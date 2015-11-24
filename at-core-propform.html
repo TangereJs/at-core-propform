@@ -48,6 +48,10 @@
         };
         var propSchemaDef = {};
 
+        propertyNames.sort(function (param1, param2) {
+          return param1 > param2;
+        });
+
         propertyNames.forEach(function(propName, index) {
           propDef = properties[propName];
           propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
