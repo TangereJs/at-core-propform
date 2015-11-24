@@ -1,0 +1,131 @@
+<link rel="import" href="../at-core-form/at-core-form.html">
+
+<dom-module id="at-core-propform">
+  <style>
+
+  </style>
+  <template>
+    <at-core-form id="propForm"></at-core-form>
+  </template>
+  <script>
+    'use strict';
+    Polymer({
+      is: 'at-core-propform',
+      properties: {
+        elementName: {
+          type: String,
+          value: '',
+          observer: 'elementNameChanged'
+        },
+        value: {
+          type: Object,
+          value: function() {
+            return {};
+          },
+          observer: 'valueChanged'
+        }
+      },
+      _scopeCssViaAttr: true,
+      elementNameChanged: function(newValue, oldValue) {
+        if (newValue === "") {
+          return;
+        }
+        var elementName = newValue;
+        var self = this;
+        var propForm = this.$.propForm;
+        var element = document.createElement(elementName);
+        var properties = element.properties;
+        var propertyNames = Object.keys(properties);
+        var propDef;
+        var schema = {
+          title: elementName,
+          description: 'Demo form for ' + elementName,
+          properties: {}
+        };
+        var propSchemaDef = {};
+
+        propertyNames.forEach(function(propName, index) {
+          propDef = properties[propName];
+          propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
+          schema.properties[propName] = propSchemaDef;
+        });
+        propForm.schema = schema;
+
+        propForm.removeEventListener('data-changed', _data_changed);
+        propForm.addEventListener('data-changed', _data_changed);
+
+        function _data_changed(event) {
+          var value = event.detail.value;
+          self.fire('value-changed', {
+            value: value
+          });
+        }
+      },
+      valueChanged: function(newValue, oldValue) {
+        var propForm = this.$.propForm;
+        propForm.data = newValue;
+      },
+      updateFormElementData: function(elementId, value) {
+        var propForm = this.$.propForm;
+        propForm.updateFormElementData(elementId, value);
+      },
+      _convertPolymerElementPropertyToAtCoreFormSchema: function(polymerElementPropertyName, polymerElementPropertyDefinition) {
+        var
+          propName = polymerElementPropertyName,
+          propDef = polymerElementPropertyDefinition,
+          schema = {
+            title: propName,
+            description: 'Settings for ' + propName,
+            properties: {}
+          },
+          tmpDef,
+          propSchemaDef = {
+            type: '',
+            xtype: '',
+            title: '',
+            required: false,
+            disabled: false,
+            default: ''
+          },
+          propertyNameIgnoreList = ["type", "value", "reflectToAttribute", "readOnly", "notify", "computed", "observer", "defined"];
+
+        // polymer project property definition is found here
+        // https://www.polymer-project.org/1.0/docs/devguide/properties.html
+        // propDef can be a function or a object
+        // if its a function create a tmpDef with propDef.type = propDef
+        if (window.schemaHelpers.isFunction(propDef)) {
+          tmpDef = {
+            type: propDef
+          };
+        } else {
+          // else work with tmpDef = propDef
+          tmpDef = propDef;
+        }
+        // set title to be property name
+        propSchemaDef.title = propName;
+        // convert type function to type string
+        var computedType = typeof tmpDef.type();
+        if (computedType === "object") {
+          if (isArray(tmpDef.type())) {
+            computedType = "array";
+          }
+        }
+        propSchemaDef.type = computedType;
+        // convert value or value function to default
+        var computedValue = tmpDef.value;
+        if (window.schemaHelpers.notNull(tmpDef.value)) {
+          if (isFunction(tmpDef.value)) {
+            computedValue = tmpDef.value();
+          }
+          propSchemaDef.default = computedValue;
+        }
+
+        // copy over everything else, but ignore property names in propertyNameIgnoreList becase they do not make sense in at json schema
+        var propertyNames = Object.keys(tmpDef);
+        window.schemaHelpers.copyProperties(propertyNames, propertyNameIgnoreList, tmpDef, propSchemaDef);
+
+        return propSchemaDef;
+      }
+    });
+  </script>
+</dom-module>
