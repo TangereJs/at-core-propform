@@ -138,6 +138,9 @@
           }
         }
         propSchemaDef.type = computedType;
+        if (computedType === 'object') {
+          propSchemaDef.xtype = 'json';
+        }
         // convert value or value function to default
         var computedValue = tmpDef.value;
         if (window.schemaHelpers.notNull(tmpDef.value)) {
