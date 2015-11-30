@@ -12,10 +12,10 @@
     Polymer({
       is: 'at-core-propform',
       properties: {
-        elementName: {
+        elementInstance: {
           type: String,
           value: '',
-          observer: 'elementNameChanged'
+          observer: 'elementInstanceChanged'
         },
         value: {
           type: Object,
@@ -38,20 +38,20 @@
         this.resetResizeSensor();
       },
       ready: function () {
-        this.elementNameChanged(this.elementName, '');
+        this.elementInstanceChanged(this.elementName, '');
       },
       resetResizeSensor: function () {
         var propForm = this.$.propForm;
         propForm.resetResizeSensor();
       },
-      elementNameChanged: function(newValue, oldValue) {
-        if (newValue === "") {
+      elementInstanceChanged: function(newValue, oldValue) {
+        if (!newValue || !newValue.properties) {
           return;
         }
         var elementName = newValue;
         var self = this;
         var propForm = this.$.propForm;
-        var element = document.createElement(elementName);
+        var element = newValue;
         var properties = element.properties;
         var propertyNames = Object.keys(properties);
         var propDef;

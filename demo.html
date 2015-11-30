@@ -5,9 +5,53 @@
     <title>at-core-propform demo</title>
     <script src="../webcomponentsjs/webcomponents-lite.js" charset="utf-8"></script>
     <link rel="import" href="../polymer/polymer.html">
+    <link rel="import" href="../iron-flex-layout/classes/iron-flex-layout.html">
     <link rel="import" href="at-core-propform.html">
+    <link rel="import" href="../at-form-text/at-form-text.html">
+
+    <style media="screen">
+      .container {
+        border: 1px dotted black;
+        margin: 5% 10%;
+      }
+    </style>
   </head>
   <body>
-    <at-core-propform element-name="at-form-text"></at-core-propform>
+    <div class="container">
+      <h3>at-core-propform demo</h3>
+      <p>
+        Fields in this demo are <b>NOT</b> data bound. That is <b>NOT</b> the purpose of this demo. To experiment with bound fileds use <a href="../at-doc-demo/demo.html"> at-doc-demo</a> instaed.
+      </p>
+    </div>
+    <div class="layout horizontal container">
+      <div class="flex-6">
+        <at-core-propform id="atPropForm"></at-core-propform>
+      </div>
+      <div class="flex-6">
+        <at-form-text id="atText" label="at-core-propform demo label 1"></at-form-text>
+      </div>
+    </div>
+    <div class="layout horizontal container">
+      <div class="flex-6">
+        <at-core-propform id="atPropForm2"></at-core-propform>
+      </div>
+      <div class="flex-6">
+        <at-form-text id="atText2" label="at-core-propform demo label 2"></at-form-text>
+      </div>
+    </div>
   </body>
+  <script type="text/javascript">
+    document.addEventListener('WebComponentsReady', function () {
+      var atPropForm = document.getElementById('atPropForm');
+      var atText = document.getElementById('atText');
+
+      atPropForm.elementInstance = atText;
+
+      var atPropForm2 = document.getElementById('atPropForm2');
+      var atText2 = document.getElementById('atText2');
+
+      atPropForm2.elementInstance = atText2;
+
+    });
+  </script>
 </html>
