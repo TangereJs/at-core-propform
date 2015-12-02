@@ -83,7 +83,6 @@
         };
         var propSchemaDef = {};
 
-
         propertyNames.sort(function(param1, param2) {
           return param1 > param2;
         });
@@ -99,6 +98,9 @@
           }
         });
         propForm.schema = schema;
+        var initialData = {};
+        schemaHelpers.copyProperties(Object.keys(schema.properties), [], element, initialData);
+        propForm.data = initialData;
 
         element.addEventListener('value-changed', this._boundValueChangedHandler);
         element.addEventListener('valid-changed', this._boundValidChangedHandler);
