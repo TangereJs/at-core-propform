@@ -48,6 +48,11 @@
         if (!newValue || !newValue.properties) {
           return;
         }
+        if (oldValue && oldValue.properties) {
+          //detach events from previously bound element
+          oldValue.removeEventListener('value-changed', elementValueChangedHandler);
+          oldValue.removeEventListener('valid-changed', elementValidChangedHandler);
+        }
         var elementName = newValue;
         var self = this;
         var propForm = this.$.propForm;
@@ -88,11 +93,30 @@
         });
 
         function _data_changed(event) {
+          event.stopPropagation();
+          var value = event.detail.value;
+          var propertyNames = Object.keys(value);
+          schemaHelpers.copyProperties(propertyNames, [], value, element);
+
           var value = event.detail.value;
           self.fire('value-changed', {
             value: value
           });
         }
+
+        element.addEventListener('value-changed', elementValueChangedHandler);
+        element.addEventListener('valid-changed', elementValidChangedHandler);
+
+        function elementValueChangedHandler(event) {
+          var newValue = event.detail.value;
+          coreForm.updateFormElementData('value', newValue);
+        }
+
+        function elementValidChangedHandler(event) {
+          var newValue = event.detail.value;
+          coreForm.updateFormElementData('valid', newValue);
+        }
+
       },
       valueChanged: function(newValue, oldValue) {
         var propForm = this.$.propForm;
