@@ -34,28 +34,44 @@
         var propForm = this.$.propForm;
         return propForm.schema;
       },
-      attached: function () {
+      attached: function() {
         this.resetResizeSensor();
       },
-      ready: function () {
-        this.elementInstanceChanged(this.elementName, '');
+      ready: function() {
+        this._boundValueChangedHandler = this._elementValueChangedHandler.bind(this);
+        this._boundValidChangedHandler = this._elementValidChangedHandler.bind(this);
+        this._boundDataChanged = this._dataChanged.bind(this);
+
+        var propForm = this.$.propForm;
+        propForm.addEventListener('data-changed', this._boundDataChanged);
+
+        propForm.addEventListener('value-changed', function(event) {
+          // we listen to value-changed event here to stop event bubbling from at-form-array when adding a new element
+          // this may be a jquery issue though, because this happens in form designer which uses jquery
+          event.stopPropagation();
+        });
+
+        this.elementInstanceChanged(this.elementInstance, '');
       },
-      resetResizeSensor: function () {
+      resetResizeSensor: function() {
         var propForm = this.$.propForm;
         propForm.resetResizeSensor();
       },
       elementInstanceChanged: function(newValue, oldValue) {
+        var propForm = this.$.propForm;
+        propForm.data = {};
+
         if (!newValue || !newValue.properties) {
           return;
         }
         if (oldValue && oldValue.properties) {
           //detach events from previously bound element
-          oldValue.removeEventListener('value-changed', elementValueChangedHandler);
-          oldValue.removeEventListener('valid-changed', elementValidChangedHandler);
+          oldValue.removeEventListener('value-changed', this._boundValueChangedHandler);
+          oldValue.removeEventListener('valid-changed', this._boundValidChangedHandler);
         }
+
         var elementName = newValue;
         var self = this;
-        var propForm = this.$.propForm;
         var element = newValue;
         var properties = element.properties;
         var propertyNames = Object.keys(properties);
@@ -67,7 +83,8 @@
         };
         var propSchemaDef = {};
 
-        propertyNames.sort(function (param1, param2) {
+
+        propertyNames.sort(function(param1, param2) {
           return param1 > param2;
         });
 
@@ -83,40 +100,29 @@
         });
         propForm.schema = schema;
 
-        propForm.removeEventListener('data-changed', _data_changed);
-        propForm.addEventListener('data-changed', _data_changed);
+        element.addEventListener('value-changed', this._boundValueChangedHandler);
+        element.addEventListener('valid-changed', this._boundValidChangedHandler);
+      },
+      _elementValueChangedHandler: function(event) {
+        var propForm = this.$.propForm;
+        var newValue = event.detail.value;
+        propForm.updateFormElementData('value', newValue);
+      },
+      _elementValidChangedHandler: function(event) {
+        var propForm = this.$.propForm;
+        var newValue = event.detail.value;
+        propForm.updateFormElementData('valid', newValue);
+      },
+      _dataChanged: function(event) {
+        event.stopPropagation();
+        var value = event.detail.value;
+        var propertyNames = Object.keys(value);
+        schemaHelpers.copyProperties(propertyNames, [], value, this.elementInstance);
 
-        propForm.addEventListener('value-changed', function (event) {
-          // we listen to value-changed event here to stop event bubbling from at-form-array when adding a new element
-          // this may be a jquery issue though, because this happens in form designer which uses jquery
-          event.stopPropagation();
+        var value = event.detail.value;
+        this.fire('value-changed', {
+          value: value
         });
-
-        function _data_changed(event) {
-          event.stopPropagation();
-          var value = event.detail.value;
-          var propertyNames = Object.keys(value);
-          schemaHelpers.copyProperties(propertyNames, [], value, element);
-
-          var value = event.detail.value;
-          self.fire('value-changed', {
-            value: value
-          });
-        }
-
-        element.addEventListener('value-changed', elementValueChangedHandler);
-        element.addEventListener('valid-changed', elementValidChangedHandler);
-
-        function elementValueChangedHandler(event) {
-          var newValue = event.detail.value;
-          propForm.updateFormElementData('value', newValue);
-        }
-
-        function elementValidChangedHandler(event) {
-          var newValue = event.detail.value;
-          propForm.updateFormElementData('valid', newValue);
-        }
-
       },
       valueChanged: function(newValue, oldValue) {
         var propForm = this.$.propForm;
@@ -126,7 +132,7 @@
         var propForm = this.$.propForm;
         propForm.updateFormElementData(elementId, value);
       },
-      resetResizeSensor: function () {
+      resetResizeSensor: function() {
         var propForm = this.$.propForm;
         propForm.resetResizeSensor();
       },
