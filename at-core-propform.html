@@ -41,6 +41,7 @@
         this._boundValueChangedHandler = this._elementValueChangedHandler.bind(this);
         this._boundValidChangedHandler = this._elementValidChangedHandler.bind(this);
         this._boundDataChanged = this._dataChanged.bind(this);
+        this._boundAtFormDateFormatChangedHandler = this._atFormDateFormatChangedHandler.bind(this);
 
         var propForm = this.$.propForm;
         propForm.addEventListener('data-changed', this._boundDataChanged);
@@ -68,6 +69,9 @@
           //detach events from previously bound element
           oldValue.removeEventListener('value-changed', this._boundValueChangedHandler);
           oldValue.removeEventListener('valid-changed', this._boundValidChangedHandler);
+          if (oldValue.is === 'at-form-date') {
+            oldValue.removeEventListener('format-changed', this._boundAtFormDateFormatChangedHandler);
+          }
         }
 
         var elementName = newValue;
@@ -104,6 +108,9 @@
 
         element.addEventListener('value-changed', this._boundValueChangedHandler);
         element.addEventListener('valid-changed', this._boundValidChangedHandler);
+        if (element.is === 'at-form-date') {
+          element.addEventListener('format-changed', this._boundAtFormDateFormatChangedHandler);
+        }
 
         this.resetResizeSensor();
       },
@@ -116,6 +123,11 @@
         var propForm = this.$.propForm;
         var newValue = event.detail.value;
         propForm.updateFormElementData('valid', newValue);
+      },
+      _atFormDateFormatChangedHandler: function (event) {
+        var propForm = this.$.propForm;
+        var newValue = event.detail.value;
+        propForm.updateFormElementData('format', newValue);
       },
       _dataChanged: function(event) {
         event.stopPropagation();
