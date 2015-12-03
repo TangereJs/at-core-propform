@@ -104,6 +104,8 @@
 
         element.addEventListener('value-changed', this._boundValueChangedHandler);
         element.addEventListener('valid-changed', this._boundValidChangedHandler);
+
+        this.resetResizeSensor();
       },
       _elementValueChangedHandler: function(event) {
         var propForm = this.$.propForm;
