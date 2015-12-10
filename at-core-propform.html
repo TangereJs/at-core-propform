@@ -46,6 +46,8 @@
         this._boundValidChangedHandler = this._elementValidChangedHandler.bind(this);
         this._boundDataChanged = this._dataChanged.bind(this);
         this._boundAtFormDateFormatChangedHandler = this._atFormDateFormatChangedHandler.bind(this);
+        this._boundStartDateChangedHandler = this._startDateChangedHandler.bind(this);
+        this._boundEndDateChangedHandler = this._endDateChangedHandler.bind(this);
 
         var propForm = this.$.propForm;
         propForm.addEventListener('data-changed', this._boundDataChanged);
@@ -75,6 +77,9 @@
           oldValue.removeEventListener('valid-changed', this._boundValidChangedHandler);
           if (oldValue.is === 'at-form-date') {
             oldValue.removeEventListener('format-changed', this._boundAtFormDateFormatChangedHandler);
+          } else if (oldValue.is === 'at-form-daterange') {
+            oldValue.removeEventListener('start-date-changed', this._boundStartDateChangedHandler);
+            oldValue.removeEventListener('end-date-changed', this._boundEndDateChangedHandler);
           }
         }
 
@@ -114,6 +119,9 @@
         element.addEventListener('valid-changed', this._boundValidChangedHandler);
         if (element.is === 'at-form-date') {
           element.addEventListener('format-changed', this._boundAtFormDateFormatChangedHandler);
+        } else if (element.is === 'at-form-daterange') {
+          element.addEventListener('start-date-changed', this._boundStartDateChangedHandler);
+          element.addEventListener('end-date-changed', this._boundEndDateChangedHandler);
         }
 
         this.resetResizeSensor();
@@ -121,7 +129,9 @@
       _elementValueChangedHandler: function(event) {
         var propForm = this.$.propForm;
         var newValue = event.detail.value;
-        propForm.updateFormElementData('value', newValue);
+        this.debounce('updateFormElementData', function (event) {
+          propForm.updateFormElementData('value', newValue);
+        }, 200);
       },
       _elementValidChangedHandler: function(event) {
         var propForm = this.$.propForm;
@@ -132,6 +142,16 @@
         var propForm = this.$.propForm;
         var newValue = event.detail.value;
         propForm.updateFormElementData('format', newValue);
+      },
+      _startDateChangedHandler: function (event) {
+        var propForm = this.$.propForm;
+        var newValue = event.detail.value;
+        propForm.updateFormElementData('startDate', newValue);
+      },
+      _endDateChangedHandler: function (event) {
+        var propForm = this.$.propForm;
+        var newValue = event.detail.value;
+        propForm.updateFormElementData('endDate', newValue);
       },
       _dataChanged: function(event) {
         event.stopPropagation();
