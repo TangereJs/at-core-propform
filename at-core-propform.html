@@ -211,12 +211,12 @@
         // set title to be property name
         propSchemaDef.title = propName;
         // convert type function to type string
-        var computedType =  'string';
+        var computedType =  'object';
         if (tmpDef.type) {
           computedType = typeof tmpDef.type();
         } else {
           console.log('Can not determine the type of ' + propDef.type + '.');
-          console.log('Using type string instead.');
+          console.log('Using type object instead.');
         }
         if (computedType === "object") {
           if (isArray(tmpDef.type())) {
