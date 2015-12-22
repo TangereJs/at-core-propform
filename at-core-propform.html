@@ -99,6 +99,28 @@
             schema.properties[propName] = propSchemaDef;
           }
         });
+
+        if (element.behaviors) {
+          var bIndex;
+          var bLength = element.behaviors.length;
+          var behavior;
+
+          for (bIndex = 0; bIndex < bLength; bIndex++) {
+            behavior = element.behaviors[bIndex];
+            if (behavior.properties) {
+              propertyNames = Object.keys(behavior.properties);
+              propertyNames.sort(function(param1, param2) {
+                return param1 > param2;
+              });
+              propertyNames.forEach(function (propName, index) {
+                propDef = behavior.properties[propName];
+                propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
+                schema.properties[propName] = propSchemaDef;
+              });
+            }
+          }
+        }
+
         propForm.schema = schema;
         var initialData = {};
         schemaHelpers.copyProperties(Object.keys(schema.properties), [], element, initialData);
@@ -150,6 +172,23 @@
           var eventName = propName + '-changed';
           elementInstance.addEventListener(eventName, boundPropertyChangedHandler);
         });
+
+        if (elementInstance.behaviors) {
+          var bIndex;
+          var bLength = elementInstance.behaviors.length;
+          var behavior;
+
+          for (bIndex = 0; bIndex < bLength; bIndex++) {
+            behavior = elementInstance.behaviors[bIndex];
+            if (behavior.properties) {
+              propNames = Object.keys(behavior.properties);
+              propNames.forEach(function (propName, index) {
+                var eventName = propName + '-changed';
+                elementInstance.addEventListener(eventName, boundPropertyChangedHandler);
+              });
+            }
+          }
+        }
       },
       _detachFromPropertyChangedEvents: function(elementInstance) {
         if (!elementInstance || !elementInstance.properties) {
@@ -165,6 +204,23 @@
           var eventName = propName + '-changed';
           elementInstance.removeEventListener(eventName, boundPropertyChangedHandler);
         });
+
+        if (elementInstance.behaviors) {
+          var bIndex;
+          var bLength = elementInstance.behaviors.length;
+          var behavior;
+
+          for (bIndex = 0; bIndex < bLength; bIndex++) {
+            behavior = elementInstance.behaviors[bIndex];
+            if (behavior.properties) {
+              propNames = Object.keys(behavior.properties);
+              propNames.forEach(function (propName, index) {
+                var eventName = propName + '-changed';
+                elementInstance.removeEventListener(eventName, boundPropertyChangedHandler);
+              });
+            }
+          }
+        }
       },
       _propertyChangedHandler: function(event) {
         var eventType = event.type;
