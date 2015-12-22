@@ -249,7 +249,7 @@
             xtype: '',
             title: '',
             required: false,
-            disabled: false,
+            disabled: Boolean(propDef.readOnly),
             default: ''
           },
           propertyNameIgnoreList = ["type", "value", "reflectToAttribute", "readOnly", "notify", "computed", "observer", "defined"];
