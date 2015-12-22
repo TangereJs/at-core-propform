@@ -34,6 +34,8 @@
         }
       },
       _scopeCssViaAttr: true,
+      _isInternalUpdate: false,
+      _boundPropertyChangedHandler: undefined,
       get schema() {
         var propForm = this.$.propForm;
         return propForm.schema;
@@ -42,21 +44,15 @@
         this.resetResizeSensor();
       },
       ready: function() {
-        this._boundValueChangedHandler = this._elementValueChangedHandler.bind(this);
-        this._boundValidChangedHandler = this._elementValidChangedHandler.bind(this);
-        this._boundDataChanged = this._dataChanged.bind(this);
-        this._boundAtFormDateFormatChangedHandler = this._atFormDateFormatChangedHandler.bind(this);
-        this._boundStartDateChangedHandler = this._startDateChangedHandler.bind(this);
-        this._boundEndDateChangedHandler = this._endDateChangedHandler.bind(this);
-
         var propForm = this.$.propForm;
-        propForm.addEventListener('data-changed', this._boundDataChanged);
-
         propForm.addEventListener('value-changed', function(event) {
           // we listen to value-changed event here to stop event bubbling from at-form-array when adding a new element
           // this may be a jquery issue though, because this happens in form designer which uses jquery
           event.stopPropagation();
         });
+
+        var boundDataChanged = this._dataChanged.bind(this);
+        propForm.addEventListener('data-changed', boundDataChanged);
 
         this.elementInstanceChanged(this.elementInstance, '');
       },
@@ -73,14 +69,7 @@
         }
         if (oldValue && oldValue.properties) {
           //detach events from previously bound element
-          oldValue.removeEventListener('value-changed', this._boundValueChangedHandler);
-          oldValue.removeEventListener('valid-changed', this._boundValidChangedHandler);
-          if (oldValue.is === 'at-form-date') {
-            oldValue.removeEventListener('format-changed', this._boundAtFormDateFormatChangedHandler);
-          } else if (oldValue.is === 'at-form-daterange') {
-            oldValue.removeEventListener('start-date-changed', this._boundStartDateChangedHandler);
-            oldValue.removeEventListener('end-date-changed', this._boundEndDateChangedHandler);
-          }
+          this._detachFromPropertyChangedEvents(oldValue);
         }
 
         var elementName = newValue;
@@ -115,49 +104,18 @@
         schemaHelpers.copyProperties(Object.keys(schema.properties), [], element, initialData);
         propForm.data = initialData;
 
-        element.addEventListener('value-changed', this._boundValueChangedHandler);
-        element.addEventListener('valid-changed', this._boundValidChangedHandler);
-        if (element.is === 'at-form-date') {
-          element.addEventListener('format-changed', this._boundAtFormDateFormatChangedHandler);
-        } else if (element.is === 'at-form-daterange') {
-          element.addEventListener('start-date-changed', this._boundStartDateChangedHandler);
-          element.addEventListener('end-date-changed', this._boundEndDateChangedHandler);
-        }
+        // attach to element instance events
+        this._attachToPropertyChangedEvents(this.elementInstance);
 
         this.resetResizeSensor();
-      },
-      _elementValueChangedHandler: function(event) {
-        var propForm = this.$.propForm;
-        var newValue = event.detail.value;
-        this.debounce('updateFormElementData', function (event) {
-          propForm.updateFormElementData('value', newValue);
-        }, 200);
-      },
-      _elementValidChangedHandler: function(event) {
-        var propForm = this.$.propForm;
-        var newValue = event.detail.value;
-        propForm.updateFormElementData('valid', newValue);
-      },
-      _atFormDateFormatChangedHandler: function (event) {
-        var propForm = this.$.propForm;
-        var newValue = event.detail.value;
-        propForm.updateFormElementData('format', newValue);
-      },
-      _startDateChangedHandler: function (event) {
-        var propForm = this.$.propForm;
-        var newValue = event.detail.value;
-        propForm.updateFormElementData('startDate', newValue);
-      },
-      _endDateChangedHandler: function (event) {
-        var propForm = this.$.propForm;
-        var newValue = event.detail.value;
-        propForm.updateFormElementData('endDate', newValue);
       },
       _dataChanged: function(event) {
         event.stopPropagation();
         var value = event.detail.value;
         var propertyNames = Object.keys(value);
-        schemaHelpers.copyProperties(propertyNames, [], value, this.elementInstance);
+        if (!this._isInternalUpdate) {
+          schemaHelpers.copyProperties(propertyNames, [], value, this.elementInstance);
+        }
 
         var value = event.detail.value;
         this.fire('value-changed', {
@@ -175,6 +133,50 @@
       resetResizeSensor: function() {
         var propForm = this.$.propForm;
         propForm.resetResizeSensor();
+      },
+
+      _attachToPropertyChangedEvents: function(elementInstance) {
+        if (!elementInstance || !elementInstance.properties) {
+          return;
+        }
+
+        if (!this._boundPropertyChangedHandler) {
+          this._boundPropertyChangedHandler = this._propertyChangedHandler.bind(this);
+        }
+
+        var boundPropertyChangedHandler = this._boundPropertyChangedHandler;
+        var propNames = Object.keys(elementInstance.properties);
+        propNames.forEach(function(propName, index) {
+          var eventName = propName + '-changed';
+          elementInstance.addEventListener(eventName, boundPropertyChangedHandler);
+        });
+      },
+      _detachFromPropertyChangedEvents: function(elementInstance) {
+        if (!elementInstance || !elementInstance.properties) {
+          return;
+        }
+
+        if (!this._boundPropertyChangedHandler) {
+          this._boundPropertyChangedHandler = this._propertyChangedHandler.bind(this);
+        }
+        var boundPropertyChangeHandler = this._boundPropertyChangedHandler;
+        var propNames = Object.keys(elementInstance.properties);
+        propNames.forEach(function(propName, index) {
+          var eventName = propName + '-changed';
+          elementInstance.removeEventListener(eventName, boundPropertyChangedHandler);
+        });
+      },
+      _propertyChangedHandler: function(event) {
+        var eventType = event.type;
+        var element = event.target;
+        var propForm = this.$.propForm;
+        var self = this;
+        if (eventType.indexOf('-') !== -1) {
+          var propName = eventType.split('-')[0];
+          self._isInternalUpdate = true;
+          propForm.updateFormElementData(propName, element[propName]);
+          self._isInternalUpdate = false;
+        }
       },
       _convertPolymerElementPropertyToAtCoreFormSchema: function(polymerElementPropertyName, polymerElementPropertyDefinition) {
         var
@@ -211,7 +213,7 @@
         // set title to be property name
         propSchemaDef.title = propName;
         // convert type function to type string
-        var computedType =  'object';
+        var computedType = 'object';
         if (tmpDef.type) {
           computedType = typeof tmpDef.type();
         } else {
