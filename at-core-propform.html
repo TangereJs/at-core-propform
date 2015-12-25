@@ -198,7 +198,7 @@
         if (!this._boundPropertyChangedHandler) {
           this._boundPropertyChangedHandler = this._propertyChangedHandler.bind(this);
         }
-        var boundPropertyChangeHandler = this._boundPropertyChangedHandler;
+        var boundPropertyChangedHandler = this._boundPropertyChangedHandler;
         var propNames = Object.keys(elementInstance.properties);
         propNames.forEach(function(propName, index) {
           var eventName = propName + '-changed';
