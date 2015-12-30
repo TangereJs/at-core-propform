@@ -137,6 +137,10 @@
         var propertyNames = Object.keys(value);
         if (!this._isInternalUpdate) {
           schemaHelpers.copyProperties(propertyNames, [], value, this.elementInstance);
+          var elemName = this.elementInstance.is;
+          if (["at-form-complex", "at-form-array"].indexOf(elemName) !== -1)  {
+            this.elementInstance.valueChanged(value['value'], this.elementInstance.value);
+          }
         }
 
         var value = event.detail.value;
