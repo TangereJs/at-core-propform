@@ -8,7 +8,7 @@
     <at-core-form id="propForm" hide="{{hide}}"></at-core-form>
   </template>
   <script>
-    'use strict';
+    //'use strict';
     Polymer({
       is: 'at-core-propform',
       properties: {
@@ -112,7 +112,7 @@
               propertyNames.sort(function(param1, param2) {
                 return param1 > param2;
               });
-              propertyNames.forEach(function(propName, index) {
+              propertyNames.forEach(function (propName, index) {
                 propDef = behavior.properties[propName];
                 propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
                 schema.properties[propName] = propSchemaDef;
@@ -134,34 +134,16 @@
       _dataChanged: function(event) {
         event.stopPropagation();
         var value = event.detail.value;
-        var property = event.detail.property;
+        var propertyNames = Object.keys(value);
         if (!this._isInternalUpdate) {
-          if (!property) {
-            var propertyNames = Object.keys(value);
-            schemaHelpers.copyProperties(propertyNames, [], value, this.elementInstance);
-            var elemName = this.elementInstance.is;
-            if (["at-form-complex", "at-form-array", "at-form-radio"].indexOf(elemName) !== -1) {
-              this.elementInstance.valueChanged(value['value'], this.elementInstance.value);
-            }
-            if (["at-form-radio"].indexOf(elemName) !== -1) {
-              this.elementInstance.xvaluelistChanged(value['xvaluelist'], this.elementInstance.xvaluelist);
-            }
-          } else {
-            var elIns = this.elementInstance;
-            elIns[property] = value[property];
-            var propVal = elIns[property];
-            if (this._isArray(propVal) || this._isObject(propVal)) {
-              var observerName = property + "Changed";
-              if (elIns[observerName] !== undefined) {
-                elIns[observerName](elIns[property], elIns[property]);
-              }
-            }
-          }
+          schemaHelpers.copyProperties(propertyNames, [], value, this.elementInstance);
         }
 
         var value = event.detail.value;
+        var property = event.detail.property;
         this.fire('value-changed', {
-          value: value
+          value: value,
+          property: property
         });
       },
       valueChanged: function(newValue, oldValue) {
@@ -175,6 +157,11 @@
       resetResizeSensor: function() {
         var propForm = this.$.propForm;
         propForm.resetResizeSensor();
+      },
+
+      getElement: function (elementId) {
+        var propForm = this.$.propForm;
+        return propForm.getElement(elementId);
       },
 
       _attachToPropertyChangedEvents: function(elementInstance) {
@@ -202,7 +189,7 @@
             behavior = elementInstance.behaviors[bIndex];
             if (behavior.properties) {
               propNames = Object.keys(behavior.properties);
-              propNames.forEach(function(propName, index) {
+              propNames.forEach(function (propName, index) {
                 var eventName = propName + '-changed';
                 elementInstance.addEventListener(eventName, boundPropertyChangedHandler);
               });
@@ -234,7 +221,7 @@
             behavior = elementInstance.behaviors[bIndex];
             if (behavior.properties) {
               propNames = Object.keys(behavior.properties);
-              propNames.forEach(function(propName, index) {
+              propNames.forEach(function (propName, index) {
                 var eventName = propName + '-changed';
                 elementInstance.removeEventListener(eventName, boundPropertyChangedHandler);
               });
@@ -253,12 +240,6 @@
           propForm.updateFormElementData(propName, element[propName]);
           self._isInternalUpdate = false;
         }
-      },
-      _isArray: function(obj) {
-        return Object.prototype.toString.call(obj) === "[object Array]";
-      },
-      _isObject: function(obj) {
-        return Object.prototype.toString.call(obj) === "[object Object]";
       },
       _convertPolymerElementPropertyToAtCoreFormSchema: function(polymerElementPropertyName, polymerElementPropertyDefinition) {
         var
@@ -303,7 +284,7 @@
           console.log('Using type object instead.');
         }
         if (computedType === "object") {
-          if (this._isArray(tmpDef.type())) {
+          if (isArray(tmpDef.type())) {
             computedType = "array";
           }
         }
