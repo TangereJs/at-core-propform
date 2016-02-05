@@ -145,6 +145,11 @@
             } else if (value.enum && value.enum.length > 0) {
               elIns.avilableChanged(value.enum);
             }
+          } else if (elIns.is === 'at-form-radio') {
+            if (value.xvaluelist && value.xvaluelist.length > 0) {
+              var xvaluelist = value.xvaluelist;
+              elIns.xvaluelistChanged(xvaluelist);
+            }
           }
         }
 
