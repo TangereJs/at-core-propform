@@ -190,7 +190,8 @@
         var boundPropertyChangedHandler = this._boundPropertyChangedHandler;
         var propNames = Object.keys(elementInstance.properties);
         propNames.forEach(function(propName, index) {
-          var eventName = propName + '-changed';
+          var dashCasePropName = Polymer.CaseMap.camelToDashCase(propName);
+          var eventName = dashCasePropName + '-changed';
           elementInstance.addEventListener(eventName, boundPropertyChangedHandler);
         });
 
@@ -204,7 +205,8 @@
             if (behavior.properties) {
               propNames = Object.keys(behavior.properties);
               propNames.forEach(function (propName, index) {
-                var eventName = propName + '-changed';
+                var dashCasePropName = Polymer.CaseMap.camelToDashCase(propName);
+                var eventName = dashCasePropName + '-changed';
                 elementInstance.addEventListener(eventName, boundPropertyChangedHandler);
               });
             }
@@ -222,7 +224,8 @@
         var boundPropertyChangedHandler = this._boundPropertyChangedHandler;
         var propNames = Object.keys(elementInstance.properties);
         propNames.forEach(function(propName, index) {
-          var eventName = propName + '-changed';
+          var dashCasePropName = Polymer.CaseMap.camelToDashCase(propName);
+          var eventName = dashCasePropName + '-changed';
           elementInstance.removeEventListener(eventName, boundPropertyChangedHandler);
         });
 
@@ -236,7 +239,8 @@
             if (behavior.properties) {
               propNames = Object.keys(behavior.properties);
               propNames.forEach(function (propName, index) {
-                var eventName = propName + '-changed';
+                var dashCasePropName = Polymer.CaseMap.camelToDashCase(propName);
+                var eventName = dashCasePropName + '-changed';
                 elementInstance.removeEventListener(eventName, boundPropertyChangedHandler);
               });
             }
@@ -249,7 +253,8 @@
         var propForm = this.$.propForm;
         var self = this;
         if (eventType.indexOf('-') !== -1) {
-          var propName = eventType.split('-')[0];
+          var dashCasePropName = eventType.replace('-changed', '');
+          var propName = Polymer.CaseMap.dashToCamelCase(dashCasePropName);
           self._isInternalUpdate = true;
           propForm.updateFormElementData(propName, element[propName]);
           self._isInternalUpdate = false;
