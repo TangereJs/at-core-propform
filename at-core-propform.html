@@ -90,13 +90,15 @@
         });
 
         propertyNames.forEach(function(propName, index) {
-          propDef = properties[propName];
-          if (self.mode === "default") {
-            propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
-            schema.properties[propName] = propSchemaDef;
-          } else if (self.mode === "designer" && propName !== "xtype") {
-            propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
-            schema.properties[propName] = propSchemaDef;
+          if (propName.indexOf("_") !== 0) {
+            propDef = properties[propName];
+            if (self.mode === "default") {
+              propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
+              schema.properties[propName] = propSchemaDef;
+            } else if (self.mode === "designer" && propName !== "xtype") {
+              propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
+              schema.properties[propName] = propSchemaDef;
+            }
           }
         });
 
