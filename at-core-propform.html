@@ -91,14 +91,14 @@
 
         propertyNames.forEach(function(propName, index) {
           if (propName.indexOf("_") !== 0) {
-            propDef = properties[propName];
-            if (self.mode === "default") {
-              propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
-              schema.properties[propName] = propSchemaDef;
-            } else if (self.mode === "designer" && propName !== "xtype") {
-              propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
-              schema.properties[propName] = propSchemaDef;
-            }
+          propDef = properties[propName];
+          if (self.mode === "default") {
+            propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
+            schema.properties[propName] = propSchemaDef;
+          } else if (self.mode === "designer" && propName !== "xtype") {
+            propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
+            schema.properties[propName] = propSchemaDef;
+          }
           }
         });
 
@@ -123,6 +123,15 @@
           }
         }
 
+        var xgridcolsPropDef = {
+          title: 'xgridcols',
+          type: 'string',
+          xtype: 'enum',
+          available: '3,6,12',
+          default: '6'
+        };
+        schema.properties.xgridcols = xgridcolsPropDef;
+        
         propForm.schema = schema;
         var initialData = {};
         schemaHelpers.copyProperties(Object.keys(schema.properties), [], element, initialData);
