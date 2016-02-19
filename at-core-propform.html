@@ -123,15 +123,6 @@
           }
         }
 
-        var xgridcolsPropDef = {
-          title: 'xgridcols',
-          type: 'string',
-          xtype: 'enum',
-          available: '3,6,12',
-          default: '6'
-        };
-        schema.properties.xgridcols = xgridcolsPropDef;
-        
         propForm.schema = schema;
         var initialData = {};
         schemaHelpers.copyProperties(Object.keys(schema.properties), [], element, initialData);
