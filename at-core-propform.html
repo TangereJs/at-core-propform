@@ -91,14 +91,14 @@
 
         propertyNames.forEach(function(propName, index) {
           if (propName.indexOf("_") !== 0) {
-          propDef = properties[propName];
-          if (self.mode === "default") {
-            propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
-            schema.properties[propName] = propSchemaDef;
-          } else if (self.mode === "designer" && propName !== "xtype") {
-            propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
-            schema.properties[propName] = propSchemaDef;
-          }
+            propDef = properties[propName];
+            if (self.mode === "default") {
+              propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
+              schema.properties[propName] = propSchemaDef;
+            } else if (self.mode === "designer" && propName !== "xtype") {
+              propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
+              schema.properties[propName] = propSchemaDef;
+            }
           }
         });
 
@@ -114,10 +114,12 @@
               propertyNames.sort(function(param1, param2) {
                 return param1 > param2;
               });
-              propertyNames.forEach(function (propName, index) {
-                propDef = behavior.properties[propName];
-                propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
-                schema.properties[propName] = propSchemaDef;
+              propertyNames.forEach(function(propName, index) {
+                if (propName.indexOf("_") !== 0) {
+                  propDef = behavior.properties[propName];
+                  propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
+                  schema.properties[propName] = propSchemaDef;                  
+                }
               });
             }
           }
@@ -175,7 +177,7 @@
         propForm.resetResizeSensor();
       },
 
-      getElement: function (elementId) {
+      getElement: function(elementId) {
         var propForm = this.$.propForm;
         return propForm.getElement(elementId);
       },
@@ -206,7 +208,7 @@
             behavior = elementInstance.behaviors[bIndex];
             if (behavior.properties) {
               propNames = Object.keys(behavior.properties);
-              propNames.forEach(function (propName, index) {
+              propNames.forEach(function(propName, index) {
                 var dashCasePropName = Polymer.CaseMap.camelToDashCase(propName);
                 var eventName = dashCasePropName + '-changed';
                 elementInstance.addEventListener(eventName, boundPropertyChangedHandler);
@@ -240,7 +242,7 @@
             behavior = elementInstance.behaviors[bIndex];
             if (behavior.properties) {
               propNames = Object.keys(behavior.properties);
-              propNames.forEach(function (propName, index) {
+              propNames.forEach(function(propName, index) {
                 var dashCasePropName = Polymer.CaseMap.camelToDashCase(propName);
                 var eventName = dashCasePropName + '-changed';
                 elementInstance.removeEventListener(eventName, boundPropertyChangedHandler);
@@ -316,7 +318,7 @@
         // convert value or value function to default
         var computedValue = tmpDef.value;
         if (window.schemaHelpers.notNull(tmpDef.value)) {
-          if (isFunction(tmpDef.value)) {
+          if (isFunction(tmpDef.value) && computedType !== "function") {
             computedValue = tmpDef.value();
           }
           propSchemaDef.default = computedValue;
