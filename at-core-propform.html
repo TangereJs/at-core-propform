@@ -1,10 +1,12 @@
 <link rel="import" href="../at-core-form/at-core-form.html">
 
 <dom-module id="at-core-propform">
-  <style>
-
-  </style>
   <template>
+    <style>
+      :host(:focus) {
+        outline: none;
+      }
+    </style>
     <at-core-form id="propForm" hide="{{hide}}"></at-core-form>
   </template>
   <script>
@@ -118,7 +120,7 @@
                 if (propName.indexOf("_") !== 0) {
                   propDef = behavior.properties[propName];
                   propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
-                  schema.properties[propName] = propSchemaDef;                  
+                  schema.properties[propName] = propSchemaDef;
                 }
               });
             }
