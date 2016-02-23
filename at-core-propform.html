@@ -156,6 +156,12 @@
               var xvaluelist = value.xvaluelist;
               elIns.xvaluelistChanged(xvaluelist);
             }
+          } else if (elIns.is === "at-form-array") {
+            if (value.value !== undefined) {
+              var oldValue = elIns.value;
+              var newValue = value.value;
+              elIns.valueChanged(newValue, oldValue);
+            }
           }
         }
 
