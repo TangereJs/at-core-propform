@@ -145,16 +145,23 @@
         if (!this._isInternalUpdate) {
           schemaHelpers.copyProperties(propertyNames, [], value, elIns);
           if (elIns.is === 'at-form-lookup') {
-            if (value.xvaluelist && value.xvaluelist.length > 0) {
+            if (value.xvaluelist !== undefined) {
               var xvaluelist = value.xvaluelist;
-              elIns.xvaluelistChanged(xvaluelist);
-            } else if (value.enum && value.enum.length > 0) {
+              var oldxvalueList = elIns.xvaluelist;
+              if (oldxvalueList !== xvaluelist) {
+                elIns.xvaluelistChanged(xvaluelist, oldxvalueList);
+              }
+            }
+            if (value.enum !== undefined) {
               elIns.availableChanged(value.enum);
             }
           } else if (elIns.is === 'at-form-radio') {
-            if (value.xvaluelist && value.xvaluelist.length > 0) {
+            if (value.xvaluelist !== undefined) {
+              var oldxvalueList = elIns.xvaluelist;
               var xvaluelist = value.xvaluelist;
-              elIns.xvaluelistChanged(xvaluelist);
+              if (oldxvalueList !== xvaluelist) {
+                elIns.xvaluelistChanged(xvaluelist, oldxvalueList);
+              }
             }
           } else if (elIns.is === "at-form-array") {
             if (value.value !== undefined) {
