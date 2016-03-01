@@ -159,9 +159,7 @@
             if (value.xvaluelist !== undefined) {
               var oldxvalueList = elIns.xvaluelist;
               var xvaluelist = value.xvaluelist;
-              if (oldxvalueList !== xvaluelist) {
-                elIns.xvaluelistChanged(xvaluelist, oldxvalueList);
-              }
+              elIns.xvaluelistChanged(xvaluelist, oldxvalueList);
             }
           } else if (elIns.is === "at-form-array") {
             if (value.value !== undefined) {
