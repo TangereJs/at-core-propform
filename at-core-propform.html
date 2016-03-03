@@ -1,3 +1,5 @@
+<link rel="import" href="../tangere/Tangere.html">
+<link rel="import" href="../at-i18n/at-i18n-behavior.html">
 <link rel="import" href="../at-core-form/at-core-form.html">
 
 <dom-module id="at-core-propform">
@@ -13,6 +15,7 @@
     //'use strict';
     Polymer({
       is: 'at-core-propform',
+      behaviors: [ Tangere.behaviors.i18n ],
       properties: {
         elementInstance: {
           type: String,
@@ -33,9 +36,18 @@
         hide: {
           type: Boolean,
           value: false
+        },
+        /**
+         * titleMode says what will be used as property title in at-core-propform
+         * titleMode === title says that title in property definition will be used, if provided; else property name will be used
+         * titleMode === propertyName says that property name will be used
+         * possible values ['title', 'propertyName']
+         */
+        titleMode: {
+          type: String,
+          value: 'title'
         }
       },
-      _scopeCssViaAttr: true,
       _isInternalUpdate: false,
       _boundPropertyChangedHandler: undefined,
       get schema() {
@@ -185,11 +197,6 @@
         var propForm = this.$.propForm;
         propForm.updateFormElementData(elementId, value);
       },
-      resetResizeSensor: function() {
-        var propForm = this.$.propForm;
-        propForm.resetResizeSensor();
-      },
-
       getElement: function(elementId) {
         var propForm = this.$.propForm;
         return propForm.getElement(elementId);
@@ -295,7 +302,7 @@
             disabled: Boolean(propDef.readOnly),
             default: ''
           },
-          propertyNameIgnoreList = ["type", "value", "reflectToAttribute", "readOnly", "notify", "computed", "observer", "defined"];
+          propertyNameIgnoreList = ["type", "value", "reflectToAttribute", "readOnly", "notify", "computed", "observer", "defined", "title"];
 
         // polymer project property definition is found here
         // https://www.polymer-project.org/1.0/docs/devguide/properties.html
@@ -309,8 +316,17 @@
           // else work with tmpDef = propDef
           tmpDef = propDef;
         }
-        // set title to be property name
-        propSchemaDef.title = propName;
+        if (this.titleMode === "title" && propDef.title !== undefined) {
+          // set title to be translated value of the title property
+          var title = propDef.title;
+          propSchemaDef.title = this.T(title);
+        } else if (this.titleMode === "propertyName") {
+          // set title to be property name
+          propSchemaDef.title = propName;
+        } else {
+          // set title to be property name
+          propSchemaDef.title = propName;
+        }
         // convert type function to type string
         var computedType = 'object';
         if (tmpDef.type) {
