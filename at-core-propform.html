@@ -18,8 +18,10 @@
       behaviors: [ Tangere.behaviors.i18n ],
       properties: {
         elementInstance: {
-          type: String,
-          value: '',
+          type: Object,
+          value: function () {
+            return {};
+          },
           observer: 'elementInstanceChanged'
         },
         value: {
@@ -31,7 +33,9 @@
         },
         mode: {
           type: String,
-          value: 'default'
+          value: 'default',
+          xtype: 'enum',
+          xvaluelist: [ { title: "Default", value: "default"}, { title: "Designer", value: "designer"} ]
         },
         hide: {
           type: Boolean,
@@ -45,7 +49,9 @@
          */
         titleMode: {
           type: String,
-          value: 'title'
+          value: 'title',
+          xtype: 'enum',
+          xvaluelist: [ { title: "Title", value: "title"}, { title: "Property name", value: "propertyName"} ]
         }
       },
       _isInternalUpdate: false,
