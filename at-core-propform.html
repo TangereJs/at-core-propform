@@ -82,6 +82,7 @@
       },
       elementInstanceChanged: function(newValue, oldValue) {
         var propForm = this.$.propForm;
+        propForm.schema = { properties: {} };
         propForm.data = {};
 
         if (!newValue || !newValue.properties) {
@@ -99,8 +100,8 @@
         var propertyNames = Object.keys(properties);
         var propDef;
         var schema = {
-          title: elementName,
-          description: 'Demo form for ' + elementName,
+          title: elementName.is,
+          description: 'Demo form for ' + elementName.is,
           properties: {}
         };
         var propSchemaDef = {};
@@ -113,11 +114,26 @@
           if (propName.indexOf("_") !== 0) {
             propDef = properties[propName];
             if (self.mode === "default") {
-              propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
+              if (self.titleMode === "title") {
+                if (propDef.readOnly === undefined || propDef.readOnly === false) {
+                  propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
+                  schema.properties[propName] = propSchemaDef;
+                }
+              } else {
+                propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
+                schema.properties[propName] = propSchemaDef;
+              }
               schema.properties[propName] = propSchemaDef;
             } else if (self.mode === "designer" && propName !== "xtype") {
-              propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
-              schema.properties[propName] = propSchemaDef;
+              if (self.titleMode === "title" ) {
+                if (propDef.readOnly === undefined || propDef.readOnly === false) {
+                  propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
+                  schema.properties[propName] = propSchemaDef;
+                }
+              } else {
+                propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
+                schema.properties[propName] = propSchemaDef;
+              }
             }
           }
         });
@@ -137,8 +153,15 @@
               propertyNames.forEach(function(propName, index) {
                 if (propName.indexOf("_") !== 0) {
                   propDef = behavior.properties[propName];
-                  propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
-                  schema.properties[propName] = propSchemaDef;
+                  if (self.titleMode === "title") {
+                    if (propDef.readOnly === undefined || propDef.readOnly === false) {
+                      propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
+                      schema.properties[propName] = propSchemaDef;
+                    }
+                  } else {
+                    propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
+                    schema.properties[propName] = propSchemaDef;
+                  }
                 }
               });
             }
