@@ -83,7 +83,6 @@
       elementInstanceChanged: function(newValue, oldValue) {
         var propForm = this.$.propForm;
         propForm.schema = { properties: {} };
-        propForm.data = {};
 
         if (!newValue || !newValue.properties) {
           return;
