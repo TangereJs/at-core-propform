@@ -195,7 +195,7 @@
             if (value.enum !== undefined) {
               elIns.availableChanged(value.enum);
             }
-          } else if (elIns.is === 'at-form-radio') {
+          } else if (elIns.is === 'at-form-radio' || elIns.is === 'at-form-state') {
             if (value.xvaluelist !== undefined) {
               var oldxvalueList = elIns.xvaluelist;
               var xvaluelist = value.xvaluelist;
