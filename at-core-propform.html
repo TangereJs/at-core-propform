@@ -381,6 +381,10 @@
           propSchemaDef.default = computedValue;
         }
 
+        if (propName === "xvaluelist" || propName === "enum") {
+          propSchemaDef.xgridcols = 12;
+        }
+
         // copy over everything else, but ignore property names in propertyNameIgnoreList becase they do not make sense in at json schema
         var propertyNames = Object.keys(tmpDef);
         window.schemaHelpers.copyProperties(propertyNames, propertyNameIgnoreList, tmpDef, propSchemaDef);
