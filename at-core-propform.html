@@ -109,8 +109,12 @@
           return param1 > param2;
         });
 
+        if (!this._hiddenInDesigner) {
+          this._hiddenInDesigner = ["xurl"];
+        }
+
         propertyNames.forEach(function(propName, index) {
-          if (propName.indexOf("_") !== 0) {
+          if (propName.indexOf("_") !== 0 && self._hiddenInDesigner.indexOf(propName) === -1) {
             propDef = properties[propName];
             if (self.mode === "default") {
               if (self.titleMode === "title") {
@@ -150,7 +154,7 @@
                 return param1 > param2;
               });
               propertyNames.forEach(function(propName, index) {
-                if (propName.indexOf("_") !== 0) {
+                if (propName.indexOf("_") !== 0 && self._hiddenInDesigner.indexOf(propName) === -1) {
                   propDef = behavior.properties[propName];
                   if (self.titleMode === "title") {
                     if (propDef.readOnly === undefined || propDef.readOnly === false) {

@@ -1,7 +1,7 @@
 {
   "name": "at-core-propform",
   "private": true,
-  "version": "1.0.0.28",
+  "version": "1.0.0.48",
   "dependencies": {
     "at-core-form": "TangereJs/at-core-form#0.8-preview"
   }
