@@ -192,9 +192,9 @@
             if (value.xvaluelist !== undefined) {
               var xvaluelist = value.xvaluelist;
               var oldxvalueList = elIns.xvaluelist;
-              if (oldxvalueList !== xvaluelist) {
+              // if (oldxvalueList !== xvaluelist) {
                 elIns.xvaluelistChanged(xvaluelist, oldxvalueList);
-              }
+              // }
             }
             if (value.enum !== undefined) {
               elIns.availableChanged(value.enum);
