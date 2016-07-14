@@ -12,7 +12,7 @@
     <at-core-form id="propForm" hide="{{hide}}"></at-core-form>
   </template>
   <script>
-    //'use strict';
+
     Polymer({
       is: 'at-core-propform',
       behaviors: [ Tangere.behaviors.i18n ],
@@ -22,14 +22,14 @@
           value: function () {
             return {};
           },
-          observer: 'elementInstanceChanged'
+          observer: '_elementInstanceChanged'
         },
         value: {
           type: Object,
           value: function() {
             return {};
           },
-          observer: 'valueChanged'
+          observer: '_valueChanged'
         },
         mode: {
           type: String,
@@ -74,13 +74,13 @@
         var boundDataChanged = this._dataChanged.bind(this);
         propForm.addEventListener('data-changed', boundDataChanged);
 
-        this.elementInstanceChanged(this.elementInstance, '');
+        this._elementInstanceChanged(this.elementInstance, '');
       },
       resetResizeSensor: function() {
         var propForm = this.$.propForm;
         propForm.resetResizeSensor();
       },
-      elementInstanceChanged: function(newValue, oldValue) {
+      _elementInstanceChanged: function(newValue, oldValue) {
         var propForm = this.$.propForm;
         propForm.schema = { properties: {} };
 
@@ -209,7 +209,7 @@
             if (value.value !== undefined) {
               var oldValue = elIns.value;
               var newValue = value.value;
-              elIns.valueChanged(newValue, oldValue);
+              elIns._valueChanged(newValue, oldValue);
             }
           }
         }
@@ -221,7 +221,7 @@
           property: property
         });
       },
-      valueChanged: function(newValue, oldValue) {
+      _valueChanged: function(newValue, oldValue) {
         var propForm = this.$.propForm;
         propForm.data = newValue;
       },
