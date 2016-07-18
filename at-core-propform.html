@@ -12,14 +12,13 @@
     <at-core-form id="propForm" hide="{{hide}}"></at-core-form>
   </template>
   <script>
-
     Polymer({
       is: 'at-core-propform',
-      behaviors: [ Tangere.behaviors.i18n ],
+      behaviors: [Tangere.behaviors.i18n],
       properties: {
         elementInstance: {
           type: Object,
-          value: function () {
+          value: function() {
             return {};
           },
           observer: '_elementInstanceChanged'
@@ -35,7 +34,13 @@
           type: String,
           value: 'default',
           xtype: 'enum',
-          xvaluelist: [ { title: "Default", value: "default"}, { title: "Designer", value: "designer"} ]
+          xvaluelist: [{
+            title: "Default",
+            value: "default"
+          }, {
+            title: "Designer",
+            value: "designer"
+          }]
         },
         hide: {
           type: Boolean,
@@ -51,11 +56,15 @@
           type: String,
           value: 'title',
           xtype: 'enum',
-          xvaluelist: [ { title: "Title", value: "title"}, { title: "Property name", value: "propertyName"} ]
+          xvaluelist: [{
+            title: "Title",
+            value: "title"
+          }, {
+            title: "Property name",
+            value: "propertyName"
+          }]
         }
       },
-      _isInternalUpdate: false,
-      _boundPropertyChangedHandler: undefined,
       get schema() {
         var propForm = this.$.propForm;
         return propForm.schema;
@@ -73,34 +82,37 @@
 
         var boundDataChanged = this._dataChanged.bind(this);
         propForm.addEventListener('data-changed', boundDataChanged);
-
-        this._elementInstanceChanged(this.elementInstance, '');
       },
       resetResizeSensor: function() {
         var propForm = this.$.propForm;
         propForm.resetResizeSensor();
       },
       _elementInstanceChanged: function(newValue, oldValue) {
-        var propForm = this.$.propForm;
-        propForm.schema = { properties: {} };
+        var _sh = window.schemaHelpers;
 
-        if (!newValue || !newValue.properties) {
+        // we want new value to be custom element; typeof html element is object
+        // but typeof [] is also object so we test if newValue.is is string because polymer elements have is property
+        // finally we test if newValue properties is object and has properties
+        if (newValue === null || typeof newValue !== "object" || !_sh.isString(newValue.is) || !_sh.isObject(newValue.properties) || Object.keys(newValue.properties).length === 0) {
           return;
         }
-        if (oldValue && oldValue.properties) {
+
+        if (oldValue !== null && typeof oldValue === "object" && _sh.isString(oldValue.is) && _sh.isObject(oldValue.properties) && Object.keys(oldValue.properties).length > 0) {
           //detach events from previously bound element
           this._detachFromPropertyChangedEvents(oldValue);
         }
 
-        var elementName = newValue;
+        var propForm = this.$.propForm;
+
         var self = this;
         var element = newValue;
         var properties = element.properties;
         var propertyNames = Object.keys(properties);
         var propDef;
+
         var schema = {
-          title: elementName.is,
-          description: 'Demo form for ' + elementName.is,
+          title: element.is,
+          description: 'Demo form for ' + element.is,
           properties: {}
         };
         var propSchemaDef = {};
@@ -113,67 +125,98 @@
           this._hiddenInDesigner = ["xurl", "available", "enum"];
         }
 
-        propertyNames.forEach(function(propName, index) {
-          if (propName.indexOf("_") !== 0 && self._hiddenInDesigner.indexOf(propName) === -1) {
-            propDef = properties[propName];
-            if (self.mode === "default") {
-              if (self.titleMode === "title") {
-                if (propDef.readOnly === undefined || propDef.readOnly === false) {
-                  propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
-                  schema.properties[propName] = propSchemaDef;
-                }
-              } else {
+        for (var i = 0; i < propertyNames.length; i++) {
+          var propName = propertyNames[i];
+
+          // if propertyname starts with _ that means its private and should not be displayed in propform
+          // is propertyname should be hiddne in designer hide it
+          if (propName.indexOf("_") === 0 || self._hiddenInDesigner.indexOf(propName) !== -1) {
+            continue;
+          }
+
+          propDef = properties[propName];
+          if (self.mode === "default") {
+            if (self.titleMode === "title") {
+              if (propDef.readOnly === undefined || propDef.readOnly === false) {
                 propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
                 schema.properties[propName] = propSchemaDef;
               }
+            } else {
+              propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
               schema.properties[propName] = propSchemaDef;
-            } else if (self.mode === "designer" && propName !== "xtype") {
-              if (self.titleMode === "title" ) {
-                if (propDef.readOnly === undefined || propDef.readOnly === false) {
-                  propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
-                  schema.properties[propName] = propSchemaDef;
-                }
-              } else {
+            }
+            schema.properties[propName] = propSchemaDef;
+          } else if (self.mode === "designer" && propName !== "xtype") {
+            if (self.titleMode === "title") {
+              if (propDef.readOnly === undefined || propDef.readOnly === false) {
                 propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
                 schema.properties[propName] = propSchemaDef;
               }
+            } else {
+              propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
+              schema.properties[propName] = propSchemaDef;
             }
           }
-        });
+        }
 
-        if (element.behaviors) {
+        if (_sh.isArray(element.behaviors)) {
           var bIndex;
           var bLength = element.behaviors.length;
           var behavior;
 
           for (bIndex = 0; bIndex < bLength; bIndex++) {
             behavior = element.behaviors[bIndex];
-            if (behavior.properties) {
-              propertyNames = Object.keys(behavior.properties);
-              propertyNames.sort(function(param1, param2) {
-                return param1 > param2;
-              });
-              propertyNames.forEach(function(propName, index) {
-                if (propName.indexOf("_") !== 0 && self._hiddenInDesigner.indexOf(propName) === -1) {
-                  propDef = behavior.properties[propName];
-                  if (self.titleMode === "title") {
-                    if (propDef.readOnly === undefined || propDef.readOnly === false) {
-                      propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
-                      schema.properties[propName] = propSchemaDef;
-                    }
-                  } else {
-                    propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
-                    schema.properties[propName] = propSchemaDef;
-                  }
-                }
-              });
+            if (!_sh.isObject(behavior.properties)) {
+              continue;
             }
+
+            bPropertyNames = Object.keys(behavior.properties);
+            bPropertyNames.sort(function(param1, param2) {
+              return param1 > param2;
+            });
+            for (var i = 0; i < bPropertyNames.length; i++) {
+              var bPropName = bPropertyNames[i];
+
+              if (bPropName.indexOf("_") === 0 || self._hiddenInDesigner.indexOf(bPropName) !== -1) {
+                continue;
+              }
+
+              bPropDef = behavior.properties[bPropName];
+              if (self.titleMode === "title") {
+                if (bPropDef.readOnly === undefined || bPropDef.readOnly === false) {
+                  propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(bPropName, bPropDef);
+                  schema.properties[bPropName] = propSchemaDef;
+                }
+              } else {
+                propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(bPropName, bPropDef);
+                schema.properties[bPropName] = propSchemaDef;
+              }
+            }
+
           }
         }
 
-        propForm.schema = schema;
         var initialData = {};
         schemaHelpers.copyProperties(Object.keys(schema.properties), [], element, initialData);
+
+        // if .value is set first initialData is going to overwrite entries set in .value
+        // this is not desirable so we copy over entries set in .value into .initialData
+        var value_ = this.value;
+        if (schemaHelpers.isString(value_)) {
+          try {
+            value_ = JSON.parse(value_);
+          } catch (e) {
+            console.log(e);
+          }
+        }
+
+        if (schemaHelpers.isObject(value_)) {
+          Object.keys(value_).forEach(function (propertyName, index) {
+            initialData[propertyName] = value_[propertyName];
+          });
+        }
+
+        propForm.schema = schema;
         propForm.data = initialData;
 
         // attach to element instance events
@@ -182,11 +225,16 @@
         this.resetResizeSensor();
       },
       _dataChanged: function(event) {
+        var _sh = window.schemaHelpers;
         event.stopPropagation();
         var elIns = this.elementInstance;
+        if (elIns === null || typeof elIns !== "object" || !_sh.isString(elIns.is) || !_sh.isObject(elIns.properties) || Object.keys(elIns.properties).length === 0) {
+          return;
+        }
+
         var value = event.detail.value;
         var propertyNames = Object.keys(value);
-        if (!this._isInternalUpdate) {
+
           schemaHelpers.copyProperties(propertyNames, [], value, elIns);
           if (elIns.is === 'at-form-lookup') {
             if (value.xvaluelist !== undefined) {
@@ -212,7 +260,6 @@
               elIns._valueChanged(newValue, oldValue);
             }
           }
-        }
 
         var value = event.detail.value;
         var property = event.detail.property;
@@ -235,9 +282,6 @@
       },
 
       _attachToPropertyChangedEvents: function(elementInstance) {
-        if (!elementInstance || !elementInstance.properties) {
-          return;
-        }
 
         if (!this._boundPropertyChangedHandler) {
           this._boundPropertyChangedHandler = this._propertyChangedHandler.bind(this);
@@ -251,28 +295,29 @@
           elementInstance.addEventListener(eventName, boundPropertyChangedHandler);
         });
 
-        if (elementInstance.behaviors) {
-          var bIndex;
-          var bLength = elementInstance.behaviors.length;
-          var behavior;
-
-          for (bIndex = 0; bIndex < bLength; bIndex++) {
-            behavior = elementInstance.behaviors[bIndex];
-            if (behavior.properties) {
-              propNames = Object.keys(behavior.properties);
-              propNames.forEach(function(propName, index) {
-                var dashCasePropName = Polymer.CaseMap.camelToDashCase(propName);
-                var eventName = dashCasePropName + '-changed';
-                elementInstance.addEventListener(eventName, boundPropertyChangedHandler);
-              });
-            }
-          }
-        }
-      },
-      _detachFromPropertyChangedEvents: function(elementInstance) {
-        if (!elementInstance || !elementInstance.properties) {
+        var _sh = window.schemaHelpers;
+        if (!_sh.isArray(elementInstance.behaviors)) {
           return;
         }
+
+        var bIndex;
+        var bLength = elementInstance.behaviors.length;
+        var behavior;
+
+        for (bIndex = 0; bIndex < bLength; bIndex++) {
+          behavior = elementInstance.behaviors[bIndex];
+          if (_sh.isObject(behavior.properties)) {
+            propNames = Object.keys(behavior.properties);
+            propNames.forEach(function(propName, index) {
+              var dashCasePropName = Polymer.CaseMap.camelToDashCase(propName);
+              var eventName = dashCasePropName + '-changed';
+              elementInstance.addEventListener(eventName, boundPropertyChangedHandler);
+            });
+          }
+        }
+
+      },
+      _detachFromPropertyChangedEvents: function(elementInstance) {
 
         if (!this._boundPropertyChangedHandler) {
           this._boundPropertyChangedHandler = this._propertyChangedHandler.bind(this);
@@ -285,21 +330,23 @@
           elementInstance.removeEventListener(eventName, boundPropertyChangedHandler);
         });
 
-        if (elementInstance.behaviors) {
-          var bIndex;
-          var bLength = elementInstance.behaviors.length;
-          var behavior;
+        if (!_sh.isArray(elementInstance.behaviors)) {
+          return;
+        }
 
-          for (bIndex = 0; bIndex < bLength; bIndex++) {
-            behavior = elementInstance.behaviors[bIndex];
-            if (behavior.properties) {
-              propNames = Object.keys(behavior.properties);
-              propNames.forEach(function(propName, index) {
-                var dashCasePropName = Polymer.CaseMap.camelToDashCase(propName);
-                var eventName = dashCasePropName + '-changed';
-                elementInstance.removeEventListener(eventName, boundPropertyChangedHandler);
-              });
-            }
+        var bIndex;
+        var bLength = elementInstance.behaviors.length;
+        var behavior;
+
+        for (bIndex = 0; bIndex < bLength; bIndex++) {
+          behavior = elementInstance.behaviors[bIndex];
+          if (_sh.isObject(behavior.properties)) {
+            propNames = Object.keys(behavior.properties);
+            propNames.forEach(function(propName, index) {
+              var dashCasePropName = Polymer.CaseMap.camelToDashCase(propName);
+              var eventName = dashCasePropName + '-changed';
+              elementInstance.removeEventListener(eventName, boundPropertyChangedHandler);
+            });
           }
         }
       },
@@ -311,9 +358,8 @@
         if (eventType.indexOf('-') !== -1) {
           var dashCasePropName = eventType.replace('-changed', '');
           var propName = Polymer.CaseMap.dashToCamelCase(dashCasePropName);
-          self._isInternalUpdate = true;
+
           propForm.updateFormElementData(propName, element[propName]);
-          self._isInternalUpdate = false;
         }
       },
       _convertPolymerElementPropertyToAtCoreFormSchema: function(polymerElementPropertyName, polymerElementPropertyDefinition) {
