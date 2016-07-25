@@ -318,7 +318,8 @@
 
       },
       _detachFromPropertyChangedEvents: function(elementInstance) {
-
+        var _sh = window.schemaHelpers;
+        
         if (!this._boundPropertyChangedHandler) {
           this._boundPropertyChangedHandler = this._propertyChangedHandler.bind(this);
         }
