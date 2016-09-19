@@ -270,6 +270,8 @@
       },
       _valueChanged: function(newValue, oldValue) {
         var propForm = this.$.propForm;
+        // clear previous value in settings form to prevent value sharing between elements
+        propForm._internalData = {};
         propForm.data = newValue;
       },
       updateFormElementData: function(elementId, value) {
