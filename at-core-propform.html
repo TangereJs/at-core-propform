@@ -251,7 +251,7 @@
             if (value.xvaluelist !== undefined) {
               var oldxvalueList = elIns.xvaluelist;
               var xvaluelist = value.xvaluelist;
-              elIns.xvaluelistChanged(xvaluelist, oldxvalueList);
+              elIns._xvaluelistChanged(xvaluelist, oldxvalueList);
             }
           } else if (elIns.is === "at-form-array") {
             if (value.value !== undefined) {
@@ -321,7 +321,7 @@
       },
       _detachFromPropertyChangedEvents: function(elementInstance) {
         var _sh = window.schemaHelpers;
-        
+
         if (!this._boundPropertyChangedHandler) {
           this._boundPropertyChangedHandler = this._propertyChangedHandler.bind(this);
         }
