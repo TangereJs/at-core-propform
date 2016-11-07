@@ -93,11 +93,11 @@
         // we want new value to be custom element; typeof html element is object
         // but typeof [] is also object so we test if newValue.is is string because polymer elements have is property
         // finally we test if newValue properties is object and has properties
-        if (newValue === null || typeof newValue !== "object" || !_sh.isString(newValue.is) || !_sh.isObject(newValue.properties) || Object.keys(newValue.properties).length === 0) {
+        if (newValue === null || typeof newValue !== "object" || !_sh.isString(newValue.is) || !_sh.isObject(newValue.properties) || Object.getOwnPropertyNames(newValue.properties).length === 0) {
           return;
         }
 
-        if (oldValue !== null && typeof oldValue === "object" && _sh.isString(oldValue.is) && _sh.isObject(oldValue.properties) && Object.keys(oldValue.properties).length > 0) {
+        if (oldValue !== null && typeof oldValue === "object" && _sh.isString(oldValue.is) && _sh.isObject(oldValue.properties) && Object.getOwnPropertyNames(oldValue.properties).length > 0) {
           //detach events from previously bound element
           this._detachFromPropertyChangedEvents(oldValue);
         }
@@ -107,7 +107,7 @@
         var self = this;
         var element = newValue;
         var properties = element.properties;
-        var propertyNames = Object.keys(properties);
+        var propertyNames = Object.getOwnPropertyNames(properties);
         var propDef;
 
         var schema = {
@@ -116,10 +116,6 @@
           properties: {}
         };
         var propSchemaDef = {};
-
-        propertyNames.sort(function(param1, param2) {
-          return param1 > param2;
-        });
 
         if (!this._hiddenInDesigner) {
           this._hiddenInDesigner = ["xurl", "available", "enum", "svg"];
@@ -170,7 +166,7 @@
               continue;
             }
 
-            bPropertyNames = Object.keys(behavior.properties);
+            bPropertyNames = Object.getOwnPropertyNames(behavior.properties);
             bPropertyNames.sort(function(param1, param2) {
               return param1 > param2;
             });
@@ -197,7 +193,7 @@
         }
 
         var initialData = {};
-        schemaHelpers.copyProperties(Object.keys(schema.properties), [], element, initialData);
+        schemaHelpers.copyProperties(Object.getOwnPropertyNames(schema.properties), [], element, initialData);
 
         // if .value is set first initialData is going to overwrite entries set in .value
         // this is not desirable so we copy over entries set in .value into .initialData
@@ -211,12 +207,43 @@
         }
 
         if (schemaHelpers.isObject(value_)) {
-          Object.keys(value_).forEach(function (propertyName, index) {
+          Object.getOwnPropertyNames(value_).forEach(function (propertyName, index) {
             initialData[propertyName] = value_[propertyName];
           });
         }
 
-        propForm.schema = schema;
+        /*
+          This is here because there is a bug in Chrome browser (Version 54.0.2840.87 m (64-bit))
+          where Array.prototype.sort function doesn't work correctly
+          This bug doesn't exist in Firefox
+        */
+        var schemaPropertyNames = Object.getOwnPropertyNames(schema.properties);
+        var spnLength = schemaPropertyNames.length;
+        var tmp = "";
+
+        for (var i = 0; i < spnLength; i++) {
+          for (var j = i+1; j < spnLength; j++) {
+            var param1 = schemaPropertyNames[i].toUpperCase();
+            var param2 = schemaPropertyNames[j].toUpperCase();
+            var let1 = param1.charAt(0);
+            var let2 = param2.charAt(0);
+            if (let1 > let2) {
+              tmp = schemaPropertyNames[i];
+              schemaPropertyNames[i] = schemaPropertyNames[j];
+              schemaPropertyNames[j] = tmp;
+            }
+          }
+        }
+
+        var orderedSchema = {
+          properties: {}
+        };
+
+        schemaPropertyNames.forEach(function(propName, index){
+          orderedSchema.properties[propName] = schema.properties[propName];
+        });
+
+        propForm.schema = orderedSchema;
         propForm.data = initialData;
 
         // attach to element instance events
@@ -228,12 +255,12 @@
         var _sh = window.schemaHelpers;
         event.stopPropagation();
         var elIns = this.elementInstance;
-        if (elIns === null || typeof elIns !== "object" || !_sh.isString(elIns.is) || !_sh.isObject(elIns.properties) || Object.keys(elIns.properties).length === 0) {
+        if (elIns === null || typeof elIns !== "object" || !_sh.isString(elIns.is) || !_sh.isObject(elIns.properties) || Object.getOwnPropertyNames(elIns.properties).length === 0) {
           return;
         }
 
         var value = event.detail.value;
-        var propertyNames = Object.keys(value);
+        var propertyNames = Object.getOwnPropertyNames(value);
 
           schemaHelpers.copyProperties(propertyNames, [], value, elIns);
           if (elIns.is === 'at-form-lookup') {
@@ -290,7 +317,7 @@
         }
 
         var boundPropertyChangedHandler = this._boundPropertyChangedHandler;
-        var propNames = Object.keys(elementInstance.properties);
+        var propNames = Object.getOwnPropertyNames(elementInstance.properties);
         propNames.forEach(function(propName, index) {
           var dashCasePropName = Polymer.CaseMap.camelToDashCase(propName);
           var eventName = dashCasePropName + '-changed';
@@ -309,7 +336,7 @@
         for (bIndex = 0; bIndex < bLength; bIndex++) {
           behavior = elementInstance.behaviors[bIndex];
           if (_sh.isObject(behavior.properties)) {
-            propNames = Object.keys(behavior.properties);
+            propNames = Object.getOwnPropertyNames(behavior.properties);
             propNames.forEach(function(propName, index) {
               var dashCasePropName = Polymer.CaseMap.camelToDashCase(propName);
               var eventName = dashCasePropName + '-changed';
@@ -326,7 +353,7 @@
           this._boundPropertyChangedHandler = this._propertyChangedHandler.bind(this);
         }
         var boundPropertyChangedHandler = this._boundPropertyChangedHandler;
-        var propNames = Object.keys(elementInstance.properties);
+        var propNames = Object.getOwnPropertyNames(elementInstance.properties);
         propNames.forEach(function(propName, index) {
           var dashCasePropName = Polymer.CaseMap.camelToDashCase(propName);
           var eventName = dashCasePropName + '-changed';
@@ -344,7 +371,7 @@
         for (bIndex = 0; bIndex < bLength; bIndex++) {
           behavior = elementInstance.behaviors[bIndex];
           if (_sh.isObject(behavior.properties)) {
-            propNames = Object.keys(behavior.properties);
+            propNames = Object.getOwnPropertyNames(behavior.properties);
             propNames.forEach(function(propName, index) {
               var dashCasePropName = Polymer.CaseMap.camelToDashCase(propName);
               var eventName = dashCasePropName + '-changed';
@@ -439,7 +466,7 @@
         }
 
         // copy over everything else, but ignore property names in propertyNameIgnoreList becase they do not make sense in at json schema
-        var propertyNames = Object.keys(tmpDef);
+        var propertyNames = Object.getOwnPropertyNames(tmpDef);
         window.schemaHelpers.copyProperties(propertyNames, propertyNameIgnoreList, tmpDef, propSchemaDef);
 
         return propSchemaDef;
