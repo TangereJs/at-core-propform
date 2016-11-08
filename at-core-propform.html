@@ -212,33 +212,14 @@
           });
         }
 
-        /*
-          This is here because there is a bug in Chrome browser (Version 54.0.2840.87 m (64-bit))
-          where Array.prototype.sort function doesn't work correctly
-          This bug doesn't exist in Firefox
-        */
         var schemaPropertyNames = Object.getOwnPropertyNames(schema.properties);
-        var spnLength = schemaPropertyNames.length;
-        var tmp = "";
-
-        for (var i = 0; i < spnLength; i++) {
-          for (var j = i+1; j < spnLength; j++) {
-            var param1 = schemaPropertyNames[i].toUpperCase();
-            var param2 = schemaPropertyNames[j].toUpperCase();
-            var let1 = param1.charAt(0);
-            var let2 = param2.charAt(0);
-            if (let1 > let2) {
-              tmp = schemaPropertyNames[i];
-              schemaPropertyNames[i] = schemaPropertyNames[j];
-              schemaPropertyNames[j] = tmp;
-            }
-          }
-        }
+        schemaPropertyNames.sort(function(prop1, prop2){
+          return prop1 > prop2 ? 1 : -1;
+        });
 
         var orderedSchema = {
           properties: {}
         };
-
         schemaPropertyNames.forEach(function(propName, index){
           orderedSchema.properties[propName] = schema.properties[propName];
         });
