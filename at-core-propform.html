@@ -425,7 +425,7 @@
           console.log('Using type object instead.');
         }
         if (computedType === "object") {
-          if (isArray(tmpDef.type())) {
+          if (schemaHelpers.isArray(tmpDef.type())) {
             computedType = "array";
           }
         }
