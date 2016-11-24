@@ -436,7 +436,7 @@
         // convert value or value function to default
         var computedValue = tmpDef.value;
         if (window.schemaHelpers.notNull(tmpDef.value)) {
-          if (isFunction(tmpDef.value) && computedType !== "function") {
+          if (window.schemaHelpers.isFunction(tmpDef.value) && computedType !== "function") {
             computedValue = tmpDef.value();
           }
           propSchemaDef.default = computedValue;
