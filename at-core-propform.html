@@ -93,9 +93,11 @@
         // we want new value to be custom element; typeof html element is object
         // but typeof [] is also object so we test if newValue.is is string because polymer elements have is property
         // finally we test if newValue properties is object and has properties
-        if (newValue === null || typeof newValue !== "object" || !_sh.isString(newValue.is) || !_sh.isObject(newValue.properties) || Object.getOwnPropertyNames(newValue.properties).length === 0) {
-          return;
-        }
+        if ( newValue === null || typeof newValue !== "object" || !_sh.isString(newValue.is)) { return; }
+
+        var hasProperties = _sh.isObject(newValue.properties) && Object.getOwnPropertyNames(newValue.properties).length > 0;
+        var hasBehaviors =  _sh.isArray(newValue.behaviors) && newValue.behaviors.length > 0;
+        if (!hasProperties && !hasBehaviors) { return; }
 
         if (oldValue !== null && typeof oldValue === "object" && _sh.isString(oldValue.is) && _sh.isObject(oldValue.properties) && Object.getOwnPropertyNames(oldValue.properties).length > 0) {
           //detach events from previously bound element
