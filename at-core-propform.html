@@ -9,7 +9,7 @@
         outline: none;
       }
     </style>
-    <at-core-form id="propForm" hide="{{hide}}"></at-core-form>
+    <at-core-form id="propForm"></at-core-form>
   </template>
   <script>
     Polymer({
@@ -44,7 +44,8 @@
         },
         hide: {
           type: Boolean,
-          value: false
+          value: false,
+          observer: '_hideChanged'
         },
         /**
          * titleMode says what will be used as property title in at-core-propform
@@ -453,6 +454,9 @@
         window.schemaHelpers.copyProperties(propertyNames, propertyNameIgnoreList, tmpDef, propSchemaDef);
 
         return propSchemaDef;
+      },
+      _hideChanged: function (newValue, oldValue) {
+        this.$.propForm.hide = newValue;
       }
     });
   </script>
