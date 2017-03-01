@@ -468,15 +468,15 @@
        * refresh - goes through all elements on contained form and calls refresh function if element has one
        */
       refresh: function() {
-     
-        if (!this.elementInstance) { return; }
+
+        if (!this.elementInstance || !this.elementInstance.properties) { return; }
         var properties = this.elementInstance.properties;
         var propertyNames = Object.getOwnPropertyNames(properties);
         var settingsCoreForm = this.$.propForm;
 
         propertyNames.forEach(function(propertyName, index) {
           var element = settingsCoreForm.getElement(propertyName);
-          if (element && element.refresh) {            
+          if (element && element.refresh) {
             element.refresh();
           }
         });
