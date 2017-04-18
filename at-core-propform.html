@@ -426,17 +426,13 @@
         }
         // convert type function to type string
         var computedType = 'object';
-        if (tmpDef.type) {
-          computedType = typeof tmpDef.type();
+        if (tmpDef.type && tmpDef.type.name !== "Element") {
+          computedType = tmpDef.type.name.toLowerCase();
         } else {
           console.log('Can not determine the type of ' + propDef.type + '.');
           console.log('Using type object instead.');
         }
-        if (computedType === "object") {
-          if (schemaHelpers.isArray(tmpDef.type())) {
-            computedType = "array";
-          }
-        }
+        
         propSchemaDef.type = computedType;
         if (computedType === 'object') {
           propSchemaDef.xtype = 'json';
