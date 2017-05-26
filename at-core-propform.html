@@ -424,10 +424,24 @@
           // set title to be property name
           propSchemaDef.title = propName;
         }
+
+        function isFunction(obj) {
+          return Object.prototype.toString.apply(obj) === "[object Function]";
+        }
         // convert type function to type string
         var computedType = 'object';
-        if (tmpDef.type && tmpDef.type.name !== "Element") {
-          computedType = tmpDef.type.name.toLowerCase();
+        if (isFunction(tmpDef.type)) {
+          if (tmpDef.type.hasOwnProperty('name') && tmpDef.type.name !== "Element") {
+            computedType = tmpDef.type.name.toLowerCase();            
+          } else {
+            var computedTypeStr = Object.prototype.toString.call(tmpDef.type());
+            var parts = computedTypeStr.split(" ");
+            var sliceValue = parts[1].slice(0, parts[1].length-1);
+            sliceValue = sliceValue.toLowerCase();
+            if (sliceValue !== "Element") { 
+              computedType = sliceValue; 
+            }
+          }        
         } else {
           console.log('Can not determine the type of ' + propDef.type + '.');
           console.log('Using type object instead.');
