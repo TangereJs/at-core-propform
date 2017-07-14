@@ -126,6 +126,10 @@
         var propSchemaDef = {};
 
         if (!this._hiddenInDesigner) {
+          // xurl is for at-form-lookup.xurl; url is visible instead
+          // available is for at-form-lookup.available; xvaluelist visible instead
+          // enum is for at-form-lookup.enum; xvaluelist visible instead
+          // svg it to hide nvd3-line.svg and nvd3-chart.svg properties ; svg property comes from ChartBehaviorImpl behavior that these elements use;
           this._hiddenInDesigner = ["xurl", "available", "enum", "svg"];
         }
 
