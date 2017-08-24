@@ -16,6 +16,7 @@
   <script src="../../iron-test-helpers/mock-interactions.js"></script>
 
   <link rel="import" href="../at-core-propform.html">
+  <link rel="import" href="../../at-form-text/at-form-text.html" />
 
 </head>
 
@@ -40,18 +41,20 @@
           var coreForm = propForm.$.propForm;
           var insertPoint = coreForm.$.insertPoint;
 
+          coreForm.addEventListener('rendered', function(){ 
+              assert.isObject(coreForm._internalData, 'internal data is not set');
+              assert.equal(Object.keys(coreForm._internalData).length, 0, 'internal data is not empty');
+              assert.isArray(coreForm._elementsToValidate, 'elements to validate is not set');
+              assert.equal(coreForm._elementsToValidate.length, 0, 'elements to validate is not empty');
+              assert.equal(Polymer.dom(insertPoint).children.length, 1, 'insert point is not empty');
+          });
+
           for (var i = 0; i < invalidElementInstances.length; i++) {
             var elementInstance = invalidElementInstances[i];
             for (var j = 0; j < invalidValues.length; j++) {
               var value = invalidValues[j];
               propForm.elementInstance = elementInstance;
               propForm.value = value;
-
-              assert.isObject(coreForm._internalData, 'internal data is not set');
-              assert.equal(Object.keys(coreForm._internalData).length, 0, 'internal data is not empty');
-              assert.isArray(coreForm._elementsToValidate, 'elements to validate is not set');
-              assert.equal(coreForm._elementsToValidate.length, 0, 'elements to validate is not empty');
-              assert.equal(Polymer.dom(insertPoint).children.length, 1, 'insert point is not empty');
             }
           }
         });
@@ -64,16 +67,18 @@
           var coreForm = propForm.$.propForm;
           var insertPoint = coreForm.$.insertPoint;
 
+          coreForm.addEventListener('rendered', function(){ 
+              assert.isObject(coreForm._internalData, 'internal data is not set');
+              assert.equal(Object.keys(coreForm._internalData).length, 0, 'internal data is not empty');
+              assert.isArray(coreForm._elementsToValidate, 'elements to validate is not set');
+              assert.equal(coreForm._elementsToValidate.length, 0, 'elements to validate is not empty');
+              assert.equal(Polymer.dom(insertPoint).children.length, 1, 'insert point is not empty');
+          });
+
           for (var i = 0; i < invalidElementInstances.length; i++) {
             var elementInstance = invalidElementInstances[i];
             propForm.elementInstance = elementInstance;
             propForm.value = value;
-
-            assert.isObject(coreForm._internalData, 'internal data is not set');
-            assert.equal(Object.keys(coreForm._internalData).length, 0, 'internal data is not empty');
-            assert.isArray(coreForm._elementsToValidate, 'elements to validate is not set');
-            assert.equal(coreForm._elementsToValidate.length, 0, 'elements to validate is not empty');
-            assert.equal(Polymer.dom(insertPoint).children.length, 1, 'insert point is not empty');
           }
         });
 
@@ -85,16 +90,18 @@
           var coreForm = propForm.$.propForm;
           var insertPoint = coreForm.$.insertPoint;
 
+          coreForm.addEventListener('rendered', function(){ 
+              assert.isObject(coreForm._internalData, 'internal data is not set');
+              assert.equal(Object.keys(coreForm._internalData).length, 0, 'internal data is not empty');
+              assert.isArray(coreForm._elementsToValidate, 'elements to validate is not set');
+              assert.equal(coreForm._elementsToValidate.length, 0, 'elements to validate is not empty');
+              assert.equal(Polymer.dom(insertPoint).children.length, 1, 'insert point is not empty');
+          });
+
           for (var j = 0; j < invalidValues.length; j++) {
             var value = invalidValues[j];
             coreForm.elementInstance = elementInstance;
             coreForm.value = value;
-
-            assert.isObject(coreForm._internalData, 'internal data is not set');
-            assert.equal(Object.keys(coreForm._internalData).length, 0, 'internal data is not empty');
-            assert.isArray(coreForm._elementsToValidate, 'elements to validate is not set');
-            assert.equal(coreForm._elementsToValidate.length, 0, 'elements to validate is not empty');
-            assert.equal(Polymer.dom(insertPoint).children.length, 1, 'insert point is not empty');
           }
         });
 
@@ -220,56 +227,61 @@
             assert.equal(coreForm.data[propertyName], initialPropertyValue, elementInstance.T('{0} value not correct in data', propertyName));
           }
 
-          assert.isArray(coreForm._elementsToValidate, 'elements to validate is not set');
-          assert.equal(coreForm._elementsToValidate.length, propertyCount, 'elements to validate doesn\'t contain corrent number of elements');
-          // _elementsToValidate must have entries for each element
-          for (var i = 0; i < coreForm._elementsToValidate.length; i++) {
-            var elementToValidate = coreForm._elementsToValidate[i];
-            assert.notEqual( propertyNames.indexOf(elementToValidate.id), -1, elementInstance.T('{0} is missing from _elementsToValidate', elementToValidate.id));
-          }
-
-          var insertPoint = coreForm.$.insertPoint;
-          assert.equal(Polymer.dom(insertPoint).children.length, 1+propertyCount, 'insert point doesn\'t contain corrent number of elements');
-
-          var eventCount = 0;
-          coreForm.addEventListener('data-changed', function(event) {
-            eventCount += 1;
-          });
-
-          coreForm.data = stringData;
-
-          assert.isObject(coreForm._internalData, 'internal data is not set');
-          assert.equal(Object.keys(coreForm._internalData).length, propertyCount, '_internalData doesn\'t contain correct number of properties');
-          assert.equal(Object.keys(coreForm.data).length, propertyCount, 'data doesn\'t contain correct number of properties');
-
-          for (var i = 0; i < propertyNames.length; i++) {
-            var propertyName = propertyNames[i];
-            var expectedValue = getPropertyDefinition(propertyName, elementInstance).value;
-
-            var testData = getData();
-            if (testData.hasOwnProperty(propertyName)) {
-              expectedValue = testData[propertyName];
+          coreForm.addEventListener('rendered', function() {
+            assert.isArray(coreForm._elementsToValidate, 'elements to validate is not set');
+            assert.equal(coreForm._elementsToValidate.length, propertyCount, 'elements to validate doesn\'t contain corrent number of elements');
+  
+            // _elementsToValidate must have entries for each element
+            for (var i = 0; i < coreForm._elementsToValidate.length; i++) {
+              var elementToValidate = coreForm._elementsToValidate[i];
+              assert.notEqual( propertyNames.indexOf(elementToValidate.id), -1, elementInstance.T('{0} is missing from _elementsToValidate', elementToValidate.id));
             }
 
-            assert.equal(coreForm._internalData[propertyName], expectedValue, elementInstance.T('{0} value not correct in _internalData', propertyName));
-            assert.equal(coreForm.data[propertyName], expectedValue, elementInstance.T('{0} value not correct in data', propertyName));
-          }
+            var insertPoint = coreForm.$.insertPoint;
+            assert.equal(Polymer.dom(insertPoint).children.length, 1+propertyCount, 'insert point doesn\'t contain corrent number of elements');
 
-          assert.isArray(coreForm._elementsToValidate, 'elements to validate is not set');
-          assert.equal(coreForm._elementsToValidate.length, propertyCount, 'elements to validate doesn\'t contain corrent number of elements');
-          // _elementsToValidate must have entries for each element
-          for (var i = 0; i < coreForm._elementsToValidate.length; i++) {
-            var elementToValidate = coreForm._elementsToValidate[i];
-            assert.notEqual( propertyNames.indexOf(elementToValidate.id), -1, elementInstance.T('{0} is missing from _elementsToValidate', elementToValidate.id));
-          }
+            var eventCount = 0;
+            coreForm.addEventListener('data-changed', function(event) {
+              eventCount += 1;
+            });
 
-          var insertPoint = coreForm.$.insertPoint;
-          assert.equal(Polymer.dom(insertPoint).children.length, 1 + propertyCount, 'insert point doesn\'t contain corrent number of elements');
+            coreForm.data = stringData;
 
-          flush(function() {
-            assert.equal(eventCount, 1, 'at-core-propform didn\'t fire corrent number of events');
-            done();
+            assert.isObject(coreForm._internalData, 'internal data is not set');
+            assert.equal(Object.keys(coreForm._internalData).length, propertyCount, '_internalData doesn\'t contain correct number of properties');
+            assert.equal(Object.keys(coreForm.data).length, propertyCount, 'data doesn\'t contain correct number of properties');
+
+            for (var i = 0; i < propertyNames.length; i++) {
+              var propertyName = propertyNames[i];
+              var expectedValue = getPropertyDefinition(propertyName, elementInstance).value;
+
+              var testData = getData();
+              if (testData.hasOwnProperty(propertyName)) {
+                expectedValue = testData[propertyName];
+              }
+
+              assert.equal(coreForm._internalData[propertyName], expectedValue, elementInstance.T('{0} value not correct in _internalData', propertyName));
+              assert.equal(coreForm.data[propertyName], expectedValue, elementInstance.T('{0} value not correct in data', propertyName));
+            }
+
+            assert.isArray(coreForm._elementsToValidate, 'elements to validate is not set');
+            assert.equal(coreForm._elementsToValidate.length, propertyCount, 'elements to validate doesn\'t contain corrent number of elements');
+            // _elementsToValidate must have entries for each element
+            for (var i = 0; i < coreForm._elementsToValidate.length; i++) {
+              var elementToValidate = coreForm._elementsToValidate[i];
+              assert.notEqual( propertyNames.indexOf(elementToValidate.id), -1, elementInstance.T('{0} is missing from _elementsToValidate', elementToValidate.id));
+            }
+
+            var insertPoint = coreForm.$.insertPoint;
+            assert.equal(Polymer.dom(insertPoint).children.length, 1 + propertyCount, 'insert point doesn\'t contain corrent number of elements');
+
+            flush(function() {
+              assert.equal(eventCount, 1, 'at-core-propform didn\'t fire corrent number of events');
+              done();
+            });
           });
+
+
         });
 
         test('elementInstance is at-form-text, data is object', function(done) {
@@ -393,11 +405,8 @@
             assert.equal(coreForm.data[propertyName], expectedValue, elementInstance.T('{0} value not correct in data', propertyName));
           });
 
-          assert.isArray(coreForm._elementsToValidate, 'elements to validate is not set');
-          assert.equal(coreForm._elementsToValidate.length, 0, 'elements to validate doesn\'t contain corrent number of elements');
-
           var insertPoint = coreForm.$.insertPoint;
-          assert.equal(Polymer.dom(insertPoint).children.length, 1, 'insert point doesn\'t contain corrent number of elements');
+          assert.equal(Polymer.dom(insertPoint).children.length, 0, 'insert point doesn\'t contain corrent number of elements');
 
           propForm.elementInstance = elementInstance;
           var propertyCount = getPropertyCount(elementInstance);
@@ -462,11 +471,8 @@
             assert.equal(coreForm.data[propertyName], expectedValue, elementInstance.T('{0} value not correct in data', propertyName));
           });
 
-          assert.isArray(coreForm._elementsToValidate, 'elements to validate is not set');
-          assert.equal(coreForm._elementsToValidate.length, 0, 'elements to validate doesn\'t contain corrent number of elements');
-
           var insertPoint = coreForm.$.insertPoint;
-          assert.equal(Polymer.dom(insertPoint).children.length, 1, 'insert point doesn\'t contain corrent number of elements');
+          assert.equal(Polymer.dom(insertPoint).children.length, 0, 'insert point doesn\'t contain corrent number of elements');
 
           propForm.elementInstance = elementInstance;
           var propertyCount = getPropertyCount(elementInstance);
@@ -531,11 +537,8 @@
             assert.equal(coreForm.data[propertyName], expectedValue, elementInstance.T('{0} value not correct in data', propertyName));
           });
 
-          assert.isArray(coreForm._elementsToValidate, 'elements to validate is not set');
-          assert.equal(coreForm._elementsToValidate.length, 0, 'elements to validate doesn\'t contain corrent number of elements');
-
           var insertPoint = coreForm.$.insertPoint;
-          assert.equal(Polymer.dom(insertPoint).children.length, 1, 'insert point doesn\'t contain corrent number of elements');
+          assert.equal(Polymer.dom(insertPoint).children.length, 0, 'insert point doesn\'t contain corrent number of elements');
 
           propForm.elementInstance = elementInstance;
           var propertyCount = getPropertyCount(elementInstance);
@@ -676,11 +679,12 @@
           assert.equal(Polymer.dom(insertPoint).children.length, 1 + propertyCount, 'insert point doesn\'t contain corrent number of elements');
 
           propForm.value = getData();
+          var dataPropCount = Object.keys(getData()).length;
 
           // internalData must have entries for each element
           assert.isObject(coreForm._internalData, 'internal data is not set');
-          assert.equal(Object.keys(coreForm._internalData).length, propertyCount, '_internalData doesn\'t contain correct number of properties');
-          assert.equal(Object.keys(coreForm.data).length, propertyCount, 'data doesn\'t contain correct number of properties');
+          assert.equal(Object.keys(coreForm._internalData).length, dataPropCount, '_internalData doesn\'t contain correct number of properties');
+          assert.equal(Object.keys(coreForm.data).length, dataPropCount, 'data doesn\'t contain correct number of properties');
 
           var testData = getData();
           var testDataPropertyNames = Object.keys(testData);
@@ -717,10 +721,11 @@
           coreForm.updateFormElementData('label', 'label lorem ipsum');
           coreForm.updateFormElementData('maxChars', 10);
 
+          var dataPropCount = testData1PropertyNames.length;
           assert.isObject(coreForm._internalData, '_internalData is not set');
-          assert.equal(Object.keys(coreForm._internalData).length, propertyCount, '_internalData doesn\'t contain correct number of properties');
+          assert.equal(Object.keys(coreForm._internalData).length, dataPropCount, '_internalData doesn\'t contain correct number of properties');
           assert.isObject(coreForm.data, 'data is not set');
-          assert.equal(Object.keys(coreForm.data).length, propertyCount, 'data doesn\'t contain correct number of properties');
+          assert.equal(Object.keys(coreForm.data).length, dataPropCount, 'data doesn\'t contain correct number of properties');
 
           for (var i = 0; i < testData1PropertyNames.length; i++) {
             var propertyName = testData1PropertyNames[i];
@@ -735,9 +740,9 @@
           coreForm.updateFormElementData('maxChars', 10);
 
           assert.isObject(coreForm._internalData, '_internalData is not set');
-          assert.equal(Object.keys(coreForm._internalData).length, propertyCount, '_internalData doesn\'t contain correct number of properties');
+          assert.equal(Object.keys(coreForm._internalData).length, dataPropCount, '_internalData doesn\'t contain correct number of properties');
           assert.isObject(coreForm.data, 'data is not set');
-          assert.equal(Object.keys(coreForm.data).length, propertyCount, 'data doesn\'t contain correct number of properties');
+          assert.equal(Object.keys(coreForm.data).length, dataPropCount, 'data doesn\'t contain correct number of properties');
 
           for (var i = 0; i < testData1PropertyNames.length; i++) {
             var propertyName = testData1PropertyNames[i];
@@ -776,11 +781,8 @@
             assert.equal(coreForm.data[propertyName], expectedValue, elementInstance.T('{0} value not correct in data', propertyName));
           });
 
-          assert.isArray(coreForm._elementsToValidate, 'elements to validate is not set');
-          assert.equal(coreForm._elementsToValidate.length, 0, 'elements to validate doesn\'t contain corrent number of elements');
-
           var insertPoint = coreForm.$.insertPoint;
-          assert.equal(Polymer.dom(insertPoint).children.length, 1, 'insert point doesn\'t contain corrent number of elements');
+          assert.equal(Polymer.dom(insertPoint).children.length, 0, 'insert point doesn\'t contain corrent number of elements');
 
           propForm.elementInstance = elementInstance;
           var propertyCount = getPropertyCount(elementInstance);
