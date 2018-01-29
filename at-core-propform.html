@@ -1,6 +1,7 @@
 <link rel="import" href="../tangere/tangere.html">
 <link rel="import" href="../at-i18n/at-i18n-behavior.html">
 <link rel="import" href="../at-core-form/at-core-form.html">
+<link rel="import" href="../at-core-spinner/at-core-spinner.html" />
 
 <dom-module id="at-core-propform">
   <template>
@@ -14,7 +15,8 @@
         outline: none;
       }
     </style>
-    <at-core-form id="propForm"></at-core-form>
+    <at-core-spinner id="spinner" type="spinner" display="block"></at-core-spinner>
+    <at-core-form id="propForm" hidden on-rendered="_handleCoreFormRendered"></at-core-form>
   </template>
   <script>
     Polymer({
@@ -94,6 +96,10 @@
         propForm.resetResizeSensor();
       },
       _elementInstanceChanged: function(newValue, oldValue) {
+        console.log('display spinner');
+        this.$.propForm.setAttribute('hidden', true);
+        this.$.spinner.removeAttribute('hidden');
+
         var _sh = window.schemaHelpers;
 
         // we want new value to be custom element; typeof html element is object
@@ -241,9 +247,15 @@
 
         // attach to element instance events
         this._attachToPropertyChangedEvents(this.elementInstance);
+      },
 
+      _handleCoreFormRendered: function(event) {
+        this.$.propForm.removeAttribute('hidden');
+        this.$.spinner.setAttribute('hidden', "none");
+        console.log('hide spinner');
         this.resetResizeSensor();
       },
+
       _dataChanged: function(event) {
         var _sh = window.schemaHelpers;
         event.stopPropagation();
