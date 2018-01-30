@@ -1,7 +1,6 @@
 <link rel="import" href="../tangere/tangere.html">
 <link rel="import" href="../at-i18n/at-i18n-behavior.html">
 <link rel="import" href="../at-core-form/at-core-form.html">
-<link rel="import" href="../at-core-spinner/at-core-spinner.html" />
 
 <dom-module id="at-core-propform">
   <template>
@@ -15,8 +14,7 @@
         outline: none;
       }
     </style>
-    <at-core-spinner id="spinner" type="spinner" display="block"></at-core-spinner>
-    <at-core-form id="propForm" hidden on-rendered="_handleCoreFormRendered"></at-core-form>
+    <at-core-form id="propForm" on-rendered="_handleCoreFormRendered"></at-core-form>
   </template>
   <script>
     Polymer({
@@ -96,11 +94,16 @@
         propForm.resetResizeSensor();
       },
       _elementInstanceChanged: function(newValue, oldValue) {
-        console.log('display spinner');
-        this.$.propForm.setAttribute('hidden', true);
-        this.$.spinner.removeAttribute('hidden');
-
         var _sh = window.schemaHelpers;
+
+        if (oldValue && typeof oldValue === "object" && _sh.isString(oldValue.is) && _sh.isObject(oldValue.properties) && Object.getOwnPropertyNames(oldValue.properties).length > 0) {
+          //detach events from previously bound element
+          this._detachFromPropertyChangedEvents(oldValue);
+        }
+
+        var propForm = this.$.propForm;
+        // clear the schema from coreform before setting the new schema
+        propForm.schema = propForm.properties.schema.value();
 
         // we want new value to be custom element; typeof html element is object
         // but typeof [] is also object so we test if newValue.is is string because polymer elements have is property
@@ -111,12 +114,7 @@
         var hasBehaviors =  _sh.isArray(newValue.behaviors) && newValue.behaviors.length > 0;
         if (!hasProperties && !hasBehaviors) { return; }
 
-        if (oldValue !== null && typeof oldValue === "object" && _sh.isString(oldValue.is) && _sh.isObject(oldValue.properties) && Object.getOwnPropertyNames(oldValue.properties).length > 0) {
-          //detach events from previously bound element
-          this._detachFromPropertyChangedEvents(oldValue);
-        }
 
-        var propForm = this.$.propForm;
 
         var self = this;
         var element = newValue;
@@ -250,10 +248,8 @@
       },
 
       _handleCoreFormRendered: function(event) {
-        this.$.propForm.removeAttribute('hidden');
-        this.$.spinner.setAttribute('hidden', "none");
-        console.log('hide spinner');
         this.resetResizeSensor();
+        this.fire('rendered', { value: this }, { bubbles: false });
       },
 
       _dataChanged: function(event) {
