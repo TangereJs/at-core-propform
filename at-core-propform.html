@@ -1,6 +1,7 @@
 <link rel="import" href="../tangere/tangere.html">
 <link rel="import" href="../at-i18n/at-i18n-behavior.html">
 <link rel="import" href="../at-core-form/at-core-form.html">
+<link rel="import" href="../at-core-spinner/at-core-spinner.html" />
 
 <dom-module id="at-core-propform">
   <template>
@@ -13,7 +14,14 @@
       :host(:focus) {
         outline: none;
       }
+
+      .core-spinner {
+        display: block;
+        box-sizing: border-box;
+        margin: 12px 0;
+      }
     </style>
+    <at-core-spinner id="coreSpinner" class="core-spinner" hidden></at-core-spinner>
     <at-core-form id="propForm" on-rendered="_handleCoreFormRendered"></at-core-form>
   </template>
   <script>
@@ -104,6 +112,8 @@
         var propForm = this.$.propForm;
         // clear the schema from coreform before setting the new schema
         propForm.schema = propForm.properties.schema.value();
+
+        this.$.coreSpinner.removeAttribute('hidden');
 
         // we want new value to be custom element; typeof html element is object
         // but typeof [] is also object so we test if newValue.is is string because polymer elements have is property
@@ -248,6 +258,7 @@
       },
 
       _handleCoreFormRendered: function(event) {
+        this.$.coreSpinner.setAttribute('hidden', true);
         this.resetResizeSensor();
         this.fire('rendered', { value: this }, { bubbles: false });
       },
