@@ -376,10 +376,14 @@
 
         var stringData = JSON.stringify(getData());
 
+        function isObject(obj) {
+          return Object.prototype.toString.apply(obj) === "[object Object]";
+        }
+
         test('elementInstance is at-form-text, value is string', function(done) {
           var propForm = document.createElement('at-core-propform');
           var coreForm = propForm.$.propForm;
-          var elementInstance = document.createElement('at-form-text');
+          var elementInstance = getElementInstace();
 
           var eventCount = 0;
           coreForm.addEventListener('data-changed', function(event) {
@@ -404,12 +408,14 @@
           var insertPoint = coreForm.$.insertPoint;
           assert.equal(Polymer.dom(insertPoint).children.length, 0, 'insert point doesn\'t contain corrent number of elements');
 
-          var skipFirstRender = true;
+          var propertyCount = getPropertyCount(elementInstance);
+          var propertyNames = getPropertyNames(elementInstance);
+          
           propForm.addEventListener('rendered', function(event) {
-            if(skipFirstRender) { skipFirstRender = false; return; }
-
-            var propertyCount = getPropertyCount(elementInstance);
-            var propertyNames = getPropertyNames(elementInstance);
+            if (!event.detail.value) return;
+            var eventSchema = event.detail.value.$.propForm.schema;
+            if (!eventSchema.properties || !isObject(eventSchema.properties)) return;
+            if (!getPropertyCount(eventSchema)) return;
 
             assert.isObject(coreForm._internalData, 'internal data is not set');
             assert.equal(Object.keys(coreForm._internalData).length, propertyCount, '_internalData doesn\'t contain correct number of properties');
@@ -478,48 +484,54 @@
           var insertPoint = coreForm.$.insertPoint;
           assert.equal(Polymer.dom(insertPoint).children.length, 0, 'insert point doesn\'t contain corrent number of elements');
 
-          propForm.elementInstance = elementInstance;
           var propertyCount = getPropertyCount(elementInstance);
           var propertyNames = getPropertyNames(elementInstance);
+          
+          propForm.addEventListener('rendered', function(event) {
+            if (!event.detail.value) return;
+            var eventSchema = event.detail.value.$.propForm.schema;
+            if (!eventSchema.properties || !isObject(eventSchema.properties)) return;
+            if (!getPropertyCount(eventSchema)) return;
 
-          assert.isObject(coreForm._internalData, 'internal data is not set');
-          assert.equal(Object.keys(coreForm._internalData).length, propertyCount, '_internalData doesn\'t contain correct number of properties');
-          assert.equal(Object.keys(coreForm.data).length, propertyCount, '_internalData doesn\'t contain correct number of properties');
+            assert.isObject(coreForm._internalData, 'internal data is not set');
+            assert.equal(Object.keys(coreForm._internalData).length, propertyCount, '_internalData doesn\'t contain correct number of properties');
+            assert.equal(Object.keys(coreForm.data).length, propertyCount, '_internalData doesn\'t contain correct number of properties');
 
-          for (var i = 0; i < propertyNames.length; i++) {
-            var propertyName = propertyNames[i];
-            var expectedValue = getPropertyDefinition(propertyName, elementInstance).value;
+            for (var i = 0; i < propertyNames.length; i++) {
+              var propertyName = propertyNames[i];
+              var expectedValue = getPropertyDefinition(propertyName, elementInstance).value;
 
-            var testData = getData();
-            if (testData.hasOwnProperty(propertyName)) {
-              expectedValue = testData[propertyName];
+              var testData = getData();
+              if (testData.hasOwnProperty(propertyName)) {
+                expectedValue = testData[propertyName];
+              }
+
+              assert.equal(coreForm._internalData[propertyName], expectedValue, elementInstance.T('{0} value not correct in _internalData', propertyName));
+              assert.equal(coreForm.data[propertyName], expectedValue, elementInstance.T('{0} value not correct in data', propertyName));
             }
 
-            assert.equal(coreForm._internalData[propertyName], expectedValue, elementInstance.T('{0} value not correct in _internalData', propertyName));
-            assert.equal(coreForm.data[propertyName], expectedValue, elementInstance.T('{0} value not correct in data', propertyName));
-          }
+            assert.isArray(coreForm._elementsToValidate, 'elements to validate is not set');
+            assert.equal(coreForm._elementsToValidate.length, propertyCount, 'elements to validate doesn\'t contain corrent number of elements');
+            // _elementsToValidate must have entries for each element
+            for (var i = 0; i < coreForm._elementsToValidate.length; i++) {
+              var elementToValidate = coreForm._elementsToValidate[i];
+              assert.notEqual(propertyNames.indexOf(elementToValidate.id), -1, elementInstance.T('{0} is missing from _elementsToValidate', elementToValidate.id));
+            }
 
-          assert.isArray(coreForm._elementsToValidate, 'elements to validate is not set');
-          assert.equal(coreForm._elementsToValidate.length, propertyCount, 'elements to validate doesn\'t contain corrent number of elements');
-          // _elementsToValidate must have entries for each element
-          for (var i = 0; i < coreForm._elementsToValidate.length; i++) {
-            var elementToValidate = coreForm._elementsToValidate[i];
-            assert.notEqual(propertyNames.indexOf(elementToValidate.id), -1, elementInstance.T('{0} is missing from _elementsToValidate', elementToValidate.id));
-          }
+            var insertPoint = coreForm.$.insertPoint;
+            assert.equal(Polymer.dom(insertPoint).children.length, 1 + propertyCount, 'insert point doesn\'t contain corrent number of elements');
 
-          var insertPoint = coreForm.$.insertPoint;
-          assert.equal(Polymer.dom(insertPoint).children.length, 1 + propertyCount, 'insert point doesn\'t contain corrent number of elements');
-
-          flush(function() {
-            assert.equal(eventCount, 2, 'at-core-propform didn\'t fire corrent number of events');
+            assert.equal(eventCount, 1, 'at-core-propform didn\'t fire corrent number of events');
             done();
           });
+
+          propForm.elementInstance = elementInstance;
         });
 
         test('elementInstance is at-form-text, value is object, data is set first, elementInstance next, set value for individual elements after', function(done) {
           var propForm = document.createElement('at-core-propform');
           var coreForm = propForm.$.propForm;
-          var elementInstance = document.createElement('at-form-text');
+          var elementInstance = getElementInstace();
 
           var eventCount = 0;
           coreForm.addEventListener('data-changed', function(event) {
@@ -544,87 +556,92 @@
           var insertPoint = coreForm.$.insertPoint;
           assert.equal(Polymer.dom(insertPoint).children.length, 0, 'insert point doesn\'t contain corrent number of elements');
 
-          propForm.elementInstance = elementInstance;
           var propertyCount = getPropertyCount(elementInstance);
           var propertyNames = getPropertyNames(elementInstance);
 
-          assert.isObject(coreForm._internalData, 'internal data is not set');
-          assert.equal(Object.keys(coreForm._internalData).length, propertyCount, '_internalData doesn\'t contain correct number of properties');
-          assert.equal(Object.keys(coreForm.data).length, propertyCount, '_internalData doesn\'t contain correct number of properties');
+          propForm.addEventListener('rendered', function(event) {
+            if (!event.detail.value) return;
+            var eventSchema = event.detail.value.$.propForm.schema;
+            if (!eventSchema.properties || !isObject(eventSchema.properties)) return;
+            if (!getPropertyCount(eventSchema)) return;
 
-          for (var i = 0; i < propertyNames.length; i++) {
-            var propertyName = propertyNames[i];
-            var expectedValue = getPropertyDefinition(propertyName, elementInstance).value;
+            assert.isObject(coreForm._internalData, 'internal data is not set');
+            assert.equal(Object.keys(coreForm._internalData).length, propertyCount, '_internalData doesn\'t contain correct number of properties');
+            assert.equal(Object.keys(coreForm.data).length, propertyCount, '_internalData doesn\'t contain correct number of properties');
 
-            var testData = getData();
-            if (testData.hasOwnProperty(propertyName)) {
-              expectedValue = testData[propertyName];
+            for (var i = 0; i < propertyNames.length; i++) {
+              var propertyName = propertyNames[i];
+              var expectedValue = getPropertyDefinition(propertyName, elementInstance).value;
+
+              var testData = getData();
+              if (testData.hasOwnProperty(propertyName)) {
+                expectedValue = testData[propertyName];
+              }
+
+              assert.equal(coreForm._internalData[propertyName], expectedValue, elementInstance.T('{0} value not correct in _internalData', propertyName));
+              assert.equal(coreForm.data[propertyName], expectedValue, elementInstance.T('{0} value not correct in data', propertyName));
             }
 
-            assert.equal(coreForm._internalData[propertyName], expectedValue, elementInstance.T('{0} value not correct in _internalData', propertyName));
-            assert.equal(coreForm.data[propertyName], expectedValue, elementInstance.T('{0} value not correct in data', propertyName));
-          }
+            assert.isArray(coreForm._elementsToValidate, 'elements to validate is not set');
+            assert.equal(coreForm._elementsToValidate.length, propertyCount, 'elements to validate doesn\'t contain corrent number of elements');
+            // _elementsToValidate must have entries for each element
+            for (var i = 0; i < coreForm._elementsToValidate.length; i++) {
+              var elementToValidate = coreForm._elementsToValidate[i];
+              assert.notEqual(propertyNames.indexOf(elementToValidate.id), -1, elementInstance.T('{0} is missing from _elementsToValidate', elementToValidate.id));
+            }
 
-          assert.isArray(coreForm._elementsToValidate, 'elements to validate is not set');
-          assert.equal(coreForm._elementsToValidate.length, propertyCount, 'elements to validate doesn\'t contain corrent number of elements');
-          // _elementsToValidate must have entries for each element
-          for (var i = 0; i < coreForm._elementsToValidate.length; i++) {
-            var elementToValidate = coreForm._elementsToValidate[i];
-            assert.notEqual(propertyNames.indexOf(elementToValidate.id), -1, elementInstance.T('{0} is missing from _elementsToValidate', elementToValidate.id));
-          }
+            var insertPoint = coreForm.$.insertPoint;
+            assert.equal(Polymer.dom(insertPoint).children.length, 1 + propertyCount, 'insert point doesn\'t contain corrent number of elements');
 
-          var insertPoint = coreForm.$.insertPoint;
-          assert.equal(Polymer.dom(insertPoint).children.length, 1 + propertyCount, 'insert point doesn\'t contain corrent number of elements');
+            var testData1 = {
+              value: 'value lorem ipsum',
+              hideLabel: 'false',
+              disabled: false,
+              label: 'label lorem ipsum',
+              maxChars: 10
+            };
+            var testData1PropertyNames = Object.keys(testData1);
 
+            /* these should trigger 5 data data-changed events */
+            coreForm.updateFormElementData('value', 'value lorem ipsum');
+            coreForm.updateFormElementData('hideLabel', 'false');
+            coreForm.updateFormElementData('disabled', false);
+            coreForm.updateFormElementData('label', 'label lorem ipsum');
+            coreForm.updateFormElementData('maxChars', 10);
 
-          var testData1 = {
-            value: 'value lorem ipsum',
-            hideLabel: 'false',
-            disabled: false,
-            label: 'label lorem ipsum',
-            maxChars: 10
-          };
-          var testData1PropertyNames = Object.keys(testData1);
+            assert.isObject(coreForm._internalData, '_internalData is not set');
+            assert.equal(Object.keys(coreForm._internalData).length, propertyCount, '_internalData doesn\'t contain correct number of properties');
+            assert.isObject(coreForm.data, 'data is not set');
+            assert.equal(Object.keys(coreForm.data).length, propertyCount, 'data doesn\'t contain correct number of properties');
 
-          /* these should trigger 5 data data-changed events */
-          coreForm.updateFormElementData('value', 'value lorem ipsum');
-          coreForm.updateFormElementData('hideLabel', 'false');
-          coreForm.updateFormElementData('disabled', false);
-          coreForm.updateFormElementData('label', 'label lorem ipsum');
-          coreForm.updateFormElementData('maxChars', 10);
+            for (var i = 0; i < testData1PropertyNames.length; i++) {
+              var propertyName = testData1PropertyNames[i];
+              assert.equal(coreForm._internalData[propertyName], testData1[propertyName], elementInstance.T('{0} value is not correct in _internalData', propertyName));
+              assert.equal(coreForm.data[propertyName], testData1[propertyName], elementInstance.T('{0} value is not correct in data', propertyName));
+            }
+            /* these should not trigger any events */
+            coreForm.updateFormElementData('value', 'value lorem ipsum');
+            coreForm.updateFormElementData('hideLabel', 'false');
+            coreForm.updateFormElementData('disabled', false);
+            coreForm.updateFormElementData('label', 'label lorem ipsum');
+            coreForm.updateFormElementData('maxChars', 10);
 
-          assert.isObject(coreForm._internalData, '_internalData is not set');
-          assert.equal(Object.keys(coreForm._internalData).length, propertyCount, '_internalData doesn\'t contain correct number of properties');
-          assert.isObject(coreForm.data, 'data is not set');
-          assert.equal(Object.keys(coreForm.data).length, propertyCount, 'data doesn\'t contain correct number of properties');
+            assert.isObject(coreForm._internalData, '_internalData is not set');
+            assert.equal(Object.keys(coreForm._internalData).length, propertyCount, '_internalData doesn\'t contain correct number of properties');
+            assert.isObject(coreForm.data, 'data is not set');
+            assert.equal(Object.keys(coreForm.data).length, propertyCount, 'data doesn\'t contain correct number of properties');
 
-          for (var i = 0; i < testData1PropertyNames.length; i++) {
-            var propertyName = testData1PropertyNames[i];
-            assert.equal(coreForm._internalData[propertyName], testData1[propertyName], elementInstance.T('{0} value is not correct in _internalData', propertyName));
-            assert.equal(coreForm.data[propertyName], testData1[propertyName], elementInstance.T('{0} value is not correct in data', propertyName));
-          }
-          /* these should not trigger any events */
-          coreForm.updateFormElementData('value', 'value lorem ipsum');
-          coreForm.updateFormElementData('hideLabel', 'false');
-          coreForm.updateFormElementData('disabled', false);
-          coreForm.updateFormElementData('label', 'label lorem ipsum');
-          coreForm.updateFormElementData('maxChars', 10);
+            for (var i = 0; i < testData1PropertyNames.length; i++) {
+              var propertyName = testData1PropertyNames[i];
+              assert.equal(coreForm._internalData[propertyName], testData1[propertyName], elementInstance.T('{0} value is not correct in _internalData', propertyName));
+              assert.equal(coreForm.data[propertyName], testData1[propertyName], elementInstance.T('{0} value is not correct in data', propertyName));
+            }
 
-          assert.isObject(coreForm._internalData, '_internalData is not set');
-          assert.equal(Object.keys(coreForm._internalData).length, propertyCount, '_internalData doesn\'t contain correct number of properties');
-          assert.isObject(coreForm.data, 'data is not set');
-          assert.equal(Object.keys(coreForm.data).length, propertyCount, 'data doesn\'t contain correct number of properties');
-
-          for (var i = 0; i < testData1PropertyNames.length; i++) {
-            var propertyName = testData1PropertyNames[i];
-            assert.equal(coreForm._internalData[propertyName], testData1[propertyName], elementInstance.T('{0} value is not correct in _internalData', propertyName));
-            assert.equal(coreForm.data[propertyName], testData1[propertyName], elementInstance.T('{0} value is not correct in data', propertyName));
-          }
-
-          flush(function() {
-            assert.equal(eventCount, 7, 'at-core-propform didn\'t fire corrent number of events');
+            assert.equal(eventCount, 6, 'at-core-propform didn\'t fire corrent number of events');
             done();
           });
+
+          propForm.elementInstance = elementInstance;
         });
 
       });
