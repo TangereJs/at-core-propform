@@ -6,32 +6,39 @@
     <script src="../webcomponentsjs/webcomponents-lite.js" charset="utf-8"></script>
     <link rel="import" href="at-core-propform.html">
     <link rel="import" href="../at-form-text/at-form-text.html">
-    <link rel="import" href="../iron-flex-layout/classes/iron-flex-layout.html">
 
-    <style media="screen">
+    <link rel="import" href="../at-core-style-classes/at-core-style-classes.html" />
+
+    <style is="custom-style" include="at-core-style-classes">
       .container {
-        border: 1px dotted black;
-        margin: 5% 10%;
+        margin: 32px 64px 0 64px;
+      }
+
+      .container.title {
+        border-bottom: 1px solid black;
       }
     </style>
   </head>
   <body>
-    <div class="container">
-      <h3>at-core-propform demo</h3>
+    <div class="container title">
+      <h4>First at-core-propform with at-form-text as element instance</h4>
     </div>
-    <div class="layout horizontal container">
-      <div class="flex-6">
+    <div class="layout-horizontal container">
+      <div class="layout-flex-6">
         <at-core-propform id="atPropForm"></at-core-propform>
       </div>
-      <div class="flex-6">
+      <div class="layout-flex-6">
         <at-form-text id="atText" label="at-core-propform demo label 1"></at-form-text>
       </div>
     </div>
-    <div class="layout horizontal container">
-      <div class="flex-6">
+    <div class="container title">
+      <h4>Second at-core-propform with at-form-text as element instance</h4>
+    </div>
+    <div class="layout-horizontal container">
+      <div class="layout-flex-6">
         <at-core-propform id="atPropForm2"></at-core-propform>
       </div>
-      <div class="flex-6">
+      <div class="layout-flex-6">
         <at-form-text id="atText2" label="at-core-propform demo label 2"></at-form-text>
       </div>
     </div>
