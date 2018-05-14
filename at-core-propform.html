@@ -167,7 +167,7 @@
               propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(propName, propDef);
               schema.properties[propName] = propSchemaDef;
             }
-            schema.properties[propName] = propSchemaDef;
+
           } else if (self.mode === "designer" && propName !== "xtype") {
             if (self.titleMode === "title") {
               if (propDef.readOnly === undefined || propDef.readOnly === false) {
