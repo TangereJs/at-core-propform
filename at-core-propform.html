@@ -204,11 +204,28 @@
               if (self.titleMode === "title") {
                 if (bPropDef.readOnly === undefined || bPropDef.readOnly === false) {
                   propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(bPropName, bPropDef);
-                  schema.properties[bPropName] = propSchemaDef;
+
+                  if (schema.properties.hasOwnProperty(propName)) {
+                    // merge behavior definition into existing one
+                    tmpSchemaDef = schema.properties[propName];
+                    schemaHelpers.copyProperties(Object.keys(propSchemaDef), [], element, initialData);
+                  } else {
+                    // add property from behavior
+                    schema.properties[bPropName] = propSchemaDef;
+                  }
                 }
               } else {
                 propSchemaDef = self._convertPolymerElementPropertyToAtCoreFormSchema(bPropName, bPropDef);
-                schema.properties[bPropName] = propSchemaDef;
+                
+                if (schema.properties.hasOwnProperty(propName)) {
+                  // merge behavior definition into existing one
+                  tmpSchemaDef = schema.properties[propName];
+                  schemaHelpers.copyProperties(Object.keys(propSchemaDef), [], element, initialData);
+                } else {
+                  // add property from behavior
+                  schema.properties[bPropName] = propSchemaDef;
+                }
+
               }
             }
 
