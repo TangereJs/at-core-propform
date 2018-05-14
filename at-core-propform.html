@@ -118,10 +118,10 @@
         // we want new value to be custom element; typeof html element is object
         // but typeof [] is also object so we test if newValue.is is string because polymer elements have is property
         // finally we test if newValue properties is object and has properties
-        if ( newValue === null || typeof newValue !== "object" || !_sh.isString(newValue.is)) { return; }
+        if (newValue === null || typeof newValue !== "object" || !_sh.isString(newValue.is)) { return; }
 
         var hasProperties = _sh.isObject(newValue.properties) && Object.getOwnPropertyNames(newValue.properties).length > 0;
-        var hasBehaviors =  _sh.isArray(newValue.behaviors) && newValue.behaviors.length > 0;
+        var hasBehaviors = _sh.isArray(newValue.behaviors) && newValue.behaviors.length > 0;
         if (!hasProperties && !hasBehaviors) { return; }
 
 
@@ -230,20 +230,20 @@
         }
 
         if (schemaHelpers.isObject(value_)) {
-          Object.getOwnPropertyNames(value_).forEach(function (propertyName, index) {
+          Object.getOwnPropertyNames(value_).forEach(function(propertyName, index) {
             initialData[propertyName] = value_[propertyName];
           });
         }
 
         var schemaPropertyNames = Object.getOwnPropertyNames(schema.properties);
-        schemaPropertyNames.sort(function(prop1, prop2){
+        schemaPropertyNames.sort(function(prop1, prop2) {
           return prop1 > prop2 ? 1 : -1;
         });
 
         var orderedSchema = {
           properties: {}
         };
-        schemaPropertyNames.forEach(function(propName, index){
+        schemaPropertyNames.forEach(function(propName, index) {
           orderedSchema.properties[propName] = schema.properties[propName];
         });
 
@@ -271,31 +271,31 @@
         var value = event.detail.value;
         var propertyNames = Object.getOwnPropertyNames(value);
 
-          schemaHelpers.copyProperties(propertyNames, [], value, elIns);
-          if (elIns.is === 'at-form-lookup') {
-            if (value.xvaluelist !== undefined) {
-              var xvaluelist = value.xvaluelist;
-              var oldxvalueList = elIns.xvaluelist;
-              // if (oldxvalueList !== xvaluelist) {
-                elIns.xvaluelistChanged(xvaluelist, oldxvalueList);
-              // }
-            }
-            if (value.enum !== undefined) {
-              elIns.availableChanged(value.enum);
-            }
-          } else if (elIns.is === 'at-form-radio' || elIns.is === 'at-form-state') {
-            if (value.xvaluelist !== undefined) {
-              var oldxvalueList = elIns.xvaluelist;
-              var xvaluelist = value.xvaluelist;
-              elIns._xvaluelistChanged(xvaluelist, oldxvalueList);
-            }
-          } else if (elIns.is === "at-form-array") {
-            if (value.value !== undefined) {
-              var oldValue = elIns.value;
-              var newValue = value.value;
-              elIns._valueChanged(newValue, oldValue);
-            }
+        schemaHelpers.copyProperties(propertyNames, [], value, elIns);
+        if (elIns.is === 'at-form-lookup') {
+          if (value.xvaluelist !== undefined) {
+            var xvaluelist = value.xvaluelist;
+            var oldxvalueList = elIns.xvaluelist;
+            // if (oldxvalueList !== xvaluelist) {
+            elIns.xvaluelistChanged(xvaluelist, oldxvalueList);
+            // }
           }
+          if (value.enum !== undefined) {
+            elIns.availableChanged(value.enum);
+          }
+        } else if (elIns.is === 'at-form-radio' || elIns.is === 'at-form-state') {
+          if (value.xvaluelist !== undefined) {
+            var oldxvalueList = elIns.xvaluelist;
+            var xvaluelist = value.xvaluelist;
+            elIns._xvaluelistChanged(xvaluelist, oldxvalueList);
+          }
+        } else if (elIns.is === "at-form-array") {
+          if (value.value !== undefined) {
+            var oldValue = elIns.value;
+            var newValue = value.value;
+            elIns._valueChanged(newValue, oldValue);
+          }
+        }
 
         var value = event.detail.value;
         var property = event.detail.property;
@@ -457,18 +457,18 @@
             try {
               var computedTypeStr = Object.prototype.toString.call(tmpDef.type());
               var parts = computedTypeStr.split(" ");
-              var sliceValue = parts[1].slice(0, parts[1].length-1);
+              var sliceValue = parts[1].slice(0, parts[1].length - 1);
               sliceValue = sliceValue.toLowerCase();
-              if (sliceValue !== "Element") { 
-                computedType = sliceValue; 
-              }              
-            } catch (e) {}
+              if (sliceValue !== "Element") {
+                computedType = sliceValue;
+              }
+            } catch (e) { }
           }
         } else {
           console.log('Can not determine the type of ' + propDef.type + '.');
           console.log('Using type object instead.');
         }
-        
+
         propSchemaDef.type = computedType;
         if (computedType === 'object') {
           propSchemaDef.xtype = 'json';
@@ -492,7 +492,7 @@
 
         return propSchemaDef;
       },
-      _hideChanged: function (newValue, oldValue) {
+      _hideChanged: function(newValue, oldValue) {
         this.$.propForm.hide = newValue;
       },
 
@@ -516,7 +516,7 @@
             element.behaviors.forEach(function(behavior, index) {
               var behaviorProperties = behavior.properties;
               var bPropNames = behaviorProperties ? Object.getOwnPropertyNames(behaviorProperties) : [];
-              bPropNames.forEach(function(bPropName, index){
+              bPropNames.forEach(function(bPropName, index) {
                 if (result.indexOf(bPropName) === -1) {
                   result.push(bPropName);
                 }
@@ -537,7 +537,7 @@
             element.refresh();
           }
         });
-      }      
+      }
     });
   </script>
 </dom-module>
