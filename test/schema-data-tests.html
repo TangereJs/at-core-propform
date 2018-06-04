@@ -193,7 +193,7 @@
         }
 
         test('elementInstance is at-form-text, data is string', function(done) {
-          var propForm = document.createElement('at-core-propform');
+          var propForm = fixture('propertyTests');
           var elementInstance = getElementInstace();
 
           var propertyCount = getPropertyCount(elementInstance);
@@ -276,7 +276,7 @@
         });
 
         test('elementInstance is at-form-text, data is object', function(done) {
-          var propForm = document.createElement('at-core-propform');
+          var propForm = fixture('propertyTests');
           var elementInstance = getElementInstace();
 
           var propertyCount = getPropertyCount(elementInstance);
@@ -381,7 +381,7 @@
         }
 
         test('elementInstance is at-form-text, value is string', function(done) {
-          var propForm = document.createElement('at-core-propform');
+          var propForm = fixture('propertyTests');
           var coreForm = propForm.$.propForm;
           var elementInstance = getElementInstace();
 
@@ -457,7 +457,7 @@
         });
 
         test('elementInstance is at-form-text, value is object', function(done) {
-          var propForm = document.createElement('at-core-propform');
+          var propForm = fixture('propertyTests');
           var coreForm = propForm.$.propForm;
           var elementInstance = document.createElement('at-form-text');
 
@@ -529,7 +529,7 @@
         });
 
         test('elementInstance is at-form-text, value is object, data is set first, elementInstance next, set value for individual elements after', function(done) {
-          var propForm = document.createElement('at-core-propform');
+          var propForm = fixture('propertyTests');
           var coreForm = propForm.$.propForm;
           var elementInstance = getElementInstace();
 
@@ -667,7 +667,7 @@
         }
 
         test('elementInstance is at-form-text, value is object,  elementInstance is set first, value next, set value for individual properties', function(done) {
-          var propForm = document.createElement('at-core-propform');
+          var propForm = fixture('propertyTests');
           var coreForm = propForm.$.propForm;
           var elementInstance = getElementInstace();
 
@@ -789,7 +789,7 @@
         });
 
         test('elementInstance is at-form-text, value is object, value is set first, elementInstance next, set value for individual properties', function(done) {
-          var propForm = document.createElement('at-core-propform');
+          var propForm = fixture('propertyTests');
           var coreForm = propForm.$.propForm;
           var elementInstance = getElementInstace();
 
